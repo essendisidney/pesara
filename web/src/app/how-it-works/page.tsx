@@ -49,19 +49,18 @@ export default function HowItWorksPage() {
       <PageIntro eyebrow="Process" title="From idea to company.">
         Evidence before engineering. Don&apos;t just build an app. Build a business.
       </PageIntro>
-      <ol className="mx-auto max-w-6xl px-5 pb-16 md:flex md:overflow-x-auto">
-        {steps.map((step) => (
-          <li
-            key={step.n}
-            className="border-t border-line py-8 md:min-w-[250px] md:border-t-0 md:border-l md:px-6 md:py-2"
-          >
-            <p className="font-mono text-[11px] tracking-[0.24em] text-gold">{step.n}</p>
-            <h2 className="mt-3 text-2xl font-medium tracking-tight">{step.title}</h2>
-            <p className="mt-4 text-sm leading-relaxed text-mute">{step.body}</p>
-          </li>
-        ))}
-      </ol>
-      <div className="mx-auto max-w-6xl px-5 pb-24">
+      <div className="mx-auto max-w-6xl px-5">
+        <ol className="grid gap-px bg-line sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step) => (
+            <li key={step.n} className="bg-ink px-6 py-8">
+              <p className="font-mono text-[11px] tracking-[0.24em] text-gold">{step.n}</p>
+              <h2 className="mt-3 text-2xl font-medium tracking-tight">{step.title}</h2>
+              <p className="mt-4 text-sm leading-relaxed text-mute">{step.body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <div className="mx-auto max-w-6xl px-5 pt-12 pb-24">
         <Button href="/submit">Submit Your Idea</Button>
       </div>
     </SiteShell>
