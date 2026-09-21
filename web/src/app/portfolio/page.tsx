@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
+import { Frame } from "@/components/marketing/frame";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Portfolio" };
@@ -14,7 +15,7 @@ export default function PortfolioPage() {
         Technology by Pesara — only according to the actual relationship.
       </PageIntro>
       <div className="mx-auto max-w-6xl px-5 pb-24">
-        <div className="border border-line px-6 py-16 text-center">
+        <Frame className="px-6 py-20 text-center">
           <p className="text-lg text-mute">The book is still empty. That is honest.</p>
           <p className="mt-2 text-sm text-mute">
             If you are building something that belongs here, start with an idea.
@@ -22,7 +23,7 @@ export default function PortfolioPage() {
           <div className="mt-8 flex justify-center">
             <Button href="/submit">Submit Your Idea</Button>
           </div>
-        </div>
+        </Frame>
       </div>
     </SiteShell>
   );

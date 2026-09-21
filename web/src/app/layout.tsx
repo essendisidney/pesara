@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Inter } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { site } from "@/config/site";
 import "./globals.css";
 
-const sans = Inter({
+const sans = Geist({
   subsets: ["latin"],
   variable: "--font-ui",
+  display: "swap",
+});
+
+const mono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-ui",
   display: "swap",
 });
 
@@ -49,7 +55,7 @@ const organisationJsonLd = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} h-full dark`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable} h-full dark`}>
       <body className={`${sans.className} min-h-full antialiased`}>
         <script
           type="application/ld+json"

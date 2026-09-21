@@ -49,15 +49,15 @@ export default function HowItWorksPage() {
       <PageIntro eyebrow="Process" title="From idea to company.">
         Evidence before engineering. Don&apos;t just build an app. Build a business.
       </PageIntro>
-      <ol className="mx-auto max-w-6xl space-y-0 px-5 pb-16 md:flex md:gap-0 md:overflow-x-auto">
+      <ol className="mx-auto max-w-6xl px-5 pb-16 md:flex md:overflow-x-auto">
         {steps.map((step) => (
           <li
             key={step.n}
-            className="border-t border-line py-8 md:min-w-[240px] md:border-t-0 md:border-l md:px-6 md:py-0"
+            className="border-t border-line py-8 md:min-w-[250px] md:border-t-0 md:border-l md:px-6 md:py-2"
           >
-            <p className="text-xs tracking-[0.18em] text-gold">{step.n}</p>
-            <h2 className="mt-2 text-xl font-semibold">{step.title}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-mute">{step.body}</p>
+            <p className="font-mono text-[11px] tracking-[0.24em] text-gold">{step.n}</p>
+            <h2 className="mt-3 text-2xl font-medium tracking-tight">{step.title}</h2>
+            <p className="mt-4 text-sm leading-relaxed text-mute">{step.body}</p>
           </li>
         ))}
       </ol>

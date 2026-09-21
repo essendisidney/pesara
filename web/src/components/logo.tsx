@@ -48,7 +48,7 @@ export function LogoLockup({
     <span className="inline-flex items-center gap-3">
       <LogoMark size={size} />
       <span
-        className={`text-[1.05rem] font-semibold tracking-[-0.03em] ${
+        className={`text-[0.95rem] font-medium tracking-[0.18em] uppercase ${
           inverted ? "text-cream" : "text-ink"
         }`}
       >

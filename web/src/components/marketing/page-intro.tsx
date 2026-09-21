@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Eyebrow } from "@/components/marketing/frame";
 
 export function PageIntro({
   eyebrow,
@@ -10,17 +11,15 @@ export function PageIntro({
   children?: ReactNode;
 }) {
   return (
-    <header className="mx-auto max-w-6xl px-5 pt-16 pb-10">
-      {eyebrow ? (
-        <p className="text-xs font-semibold tracking-[0.2em] text-gold uppercase">
-          {eyebrow}
-        </p>
-      ) : null}
-      <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-[-0.03em] sm:text-5xl">
+    <header className="mx-auto max-w-6xl px-5 pt-20 pb-12">
+      {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+      <h1 className="mt-5 max-w-3xl text-4xl leading-[1.05] font-medium tracking-[-0.045em] sm:text-6xl">
         {title}
       </h1>
       {children ? (
-        <div className="mt-5 max-w-2xl text-lg leading-relaxed text-mute">{children}</div>
+        <div className="mt-6 max-w-xl text-base leading-relaxed text-mute sm:text-lg">
+          {children}
+        </div>
       ) : null}
     </header>
   );

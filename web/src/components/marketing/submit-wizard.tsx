@@ -39,7 +39,7 @@ function Field({
   onChange: (value: string) => void;
   textarea?: boolean;
 }) {
-  const className = "mt-2 w-full border border-line bg-ink-2 px-3 text-sm";
+  const className = "mt-2 w-full rounded-[2px] border border-line bg-ink-2/80 px-3 text-sm";
   return (
     <label className="block text-sm">
       {label}
@@ -117,7 +117,7 @@ export function SubmitWizard() {
               <label className="block text-sm">
                 Applying as
                 <select
-                  className="mt-2 h-12 w-full border border-line bg-ink-2 px-3"
+                  className="mt-2 h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3"
                   value={draft.applyingAs}
                   onChange={(event) => patch({ applyingAs: event.target.value })}
                 >
@@ -146,7 +146,7 @@ export function SubmitWizard() {
               <label className="block text-sm">
                 Model
                 <select
-                  className="mt-2 h-12 w-full border border-line bg-ink-2 px-3"
+                  className="mt-2 h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3"
                   value={draft.businessType}
                   onChange={(event) => patch({ businessType: event.target.value })}
                 >
@@ -193,7 +193,7 @@ export function SubmitWizard() {
               <label className="block text-sm">
                 Time you can commit
                 <select
-                  className="mt-2 h-12 w-full border border-line bg-ink-2 px-3"
+                  className="mt-2 h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3"
                   value={draft.commitment}
                   onChange={(event) => patch({ commitment: event.target.value })}
                 >
