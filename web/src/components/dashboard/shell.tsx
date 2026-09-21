@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LogoLockup } from "@/components/logo";
+import { SignOutButton } from "@/components/dashboard/sign-out-button";
 
 const links = [
   ["Overview", "/dashboard"],
@@ -19,12 +20,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <Link href="/" aria-label="Pesara home">
             <LogoLockup size={28} inverted />
           </Link>
-          <nav className="flex flex-wrap justify-end gap-4 text-sm text-mute">
+          <nav className="flex flex-wrap items-center justify-end gap-4 text-sm text-mute">
             {links.map(([label, href]) => (
               <Link key={href} href={href} className="hover:text-cream">
                 {label}
               </Link>
             ))}
+            <SignOutButton />
           </nav>
         </div>
       </header>

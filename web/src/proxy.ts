@@ -28,7 +28,16 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getUser();
+  const path = request.nextUrl.pathname;
+  const needsAccount = path.startsWith("/dashboard") || path.startsWith("/admin");
+  if (needsAccount && !data.user) {
+    const login = request.nextUrl.clone();
+    login.pathname = "/login";
+    login.searchParams.set("next", path);
+    return NextResponse.redirect(login);
+  }
+
   return response;
 }
 
