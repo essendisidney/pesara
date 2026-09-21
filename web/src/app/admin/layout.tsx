@@ -7,7 +7,3 @@ export const metadata: Metadata = { title: "Admin" };
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return <AdminShell>{children}</AdminShell>;
 }
-
-export default function AdminLayout({ children }: { children: ReactNode }) {
-  return <AdminShell>{children}</AdminShell>;
-}
