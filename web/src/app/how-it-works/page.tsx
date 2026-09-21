@@ -50,9 +50,9 @@ export default function HowItWorksPage() {
         Evidence before engineering. Don&apos;t just build an app. Build a business.
       </PageIntro>
       <div className="mx-auto max-w-6xl px-5">
-        <ol className="grid gap-px bg-line sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="grid border-t border-l border-line sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
-            <li key={step.n} className="bg-ink px-6 py-8">
+            <li key={step.n} className="border-r border-b border-line px-6 py-8">
               <p className="font-mono text-[11px] tracking-[0.24em] text-gold">{step.n}</p>
               <h2 className="mt-3 text-2xl font-medium tracking-tight">{step.title}</h2>
               <p className="mt-4 text-sm leading-relaxed text-mute">{step.body}</p>
