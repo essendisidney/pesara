@@ -14,7 +14,8 @@ const work = [
     body: "Premium celebrations — weddings, proposals, and destination days — orchestrated so the hosts can stay present.",
     domain: "maritevents.com",
     href: "https://maritevents.com",
-    logo: "/portfolio/marit-mark.png",
+    logo: "/portfolio/marit-logo.png",
+    logoClass: "h-24 max-w-full",
   },
   {
     name: "Jameiyah",
@@ -24,6 +25,7 @@ const work = [
     domain: "jameiyah.com",
     href: "https://jameiyah.com",
     logo: "/portfolio/jameiyah-mark.png",
+    logoClass: "h-14 w-auto",
   },
   {
     name: "Little Scientist",
@@ -33,6 +35,7 @@ const work = [
     domain: "littlescientist.ke",
     href: "https://littlescientist.ke",
     logo: null,
+    logoClass: "",
   },
 ] as const;
 
@@ -52,12 +55,12 @@ export default function PortfolioPage() {
             className="group block min-h-44"
           >
             <Frame className="flex h-full flex-col px-6 py-7 transition-colors group-hover:border-gold/50">
-              <div className="flex h-16 items-center">
+              <div className="flex h-24 items-center">
                 {item.logo ? (
                   <img
                     src={item.logo}
                     alt=""
-                    className="h-14 w-auto max-w-[10rem] object-contain object-left"
+                    className={`${item.logoClass} object-contain object-left`}
                   />
                 ) : (
                   <div>
