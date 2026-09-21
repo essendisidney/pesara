@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0b0d0c;
+  --ink-2: #141816;
+  --cream: #f4f1ea;
+  --mute: #9a958c;
+  --gold: #c4a46a;
+  --forest: #1a3c32;
+  --leaf: #2f8f62;
+  --line: rgba(244, 241, 234, 0.12);
+  --status-draft: #9a958c;
+  --status-submitted: #c4a46a;
+  --status-screening: #8aa7c4;
+  --status-validation: #7eb8a4;
+  --status-committee: #c4a46a;
+  --status-accepted: #2f8f62;
+  --status-building: #6ea8d4;
+  --status-live: #3dba7a;
+  --status-scaling: #e0c48a;
+  --status-parked: #8a8680;
+  --status-declined: #b89a8a;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-cream: var(--cream);
+  --color-mute: var(--mute);
+  --color-gold: var(--gold);
+  --color-forest: var(--forest);
+  --color-leaf: var(--leaf);
+  --color-line: var(--line);
+  --font-sans: var(--font-ui);
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-ui), Inter, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+::selection {
+  background: rgba(196, 164, 106, 0.35);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}

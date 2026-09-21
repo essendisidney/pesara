@@ -1,0 +1,3 @@
+-- Production and shared seed: empty on purpose.
+-- Do not insert fictional portfolio companies as live Pesara investments.
+-- Development demos must set ventures.is_demo = true and never public_visible.
