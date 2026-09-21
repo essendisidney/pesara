@@ -12,21 +12,27 @@ const work = [
     place: "Nairobi",
     relationship: "Technology by Pesara",
     body: "Premium celebrations — weddings, proposals, and destination days — orchestrated so the hosts can stay present.",
+    domain: "maritevents.com",
     href: "https://maritevents.com",
+    logo: "/portfolio/marit-mark.png",
   },
   {
     name: "Jameiyah",
     place: "Kenya",
     relationship: "Technology by Pesara",
     body: "Community finance for Kenyan circles: merry-go-round, table banking, and savings, with statements members and officers can both see.",
+    domain: "jameiyah.com",
     href: "https://jameiyah.com",
+    logo: "/portfolio/jameiyah-mark.png",
   },
   {
     name: "Little Scientist",
     place: "Athi River",
     relationship: "Technology by Pesara",
     body: "Big science for little people. Visits, school groups, and birthday bookings at Sabaki Estate.",
-    href: "https://little-scientist.vercel.app",
+    domain: "littlescientist.ke",
+    href: "https://littlescientist.ke",
+    logo: null,
   },
 ] as const;
 
@@ -46,15 +52,35 @@ export default function PortfolioPage() {
             className="group block min-h-44"
           >
             <Frame className="flex h-full flex-col px-6 py-7 transition-colors group-hover:border-gold/50">
-              <p className="font-mono text-[11px] tracking-[0.18em] text-gold uppercase">
+              <div className="flex h-16 items-center">
+                {item.logo ? (
+                  <img
+                    src={item.logo}
+                    alt=""
+                    className="h-14 w-auto max-w-[10rem] object-contain object-left"
+                  />
+                ) : (
+                  <div>
+                    <p className="text-base font-extrabold tracking-tight text-white">
+                      Little Scientist
+                    </p>
+                    <p className="text-[11px] font-semibold text-[#ffc933]">
+                      Big Science for Little People
+                    </p>
+                  </div>
+                )}
+              </div>
+              <p className="mt-6 font-mono text-[11px] tracking-[0.18em] text-gold uppercase">
                 {item.relationship}
               </p>
-              <h2 className="mt-5 text-2xl font-medium tracking-tight">{item.name}</h2>
+              <h2 className="mt-3 text-2xl font-medium tracking-tight">{item.name}</h2>
               <p className="mt-1 font-mono text-[11px] tracking-[0.16em] text-mute uppercase">
                 {item.place}
               </p>
               <p className="mt-4 flex-1 text-sm leading-relaxed text-mute">{item.body}</p>
-              <p className="mt-6 text-[12px] tracking-[0.16em] text-cream uppercase">Visit</p>
+              <p className="mt-6 font-mono text-[12px] tracking-[0.08em] text-cream">
+                {item.domain}
+              </p>
             </Frame>
           </a>
         ))}
