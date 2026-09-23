@@ -3,6 +3,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { getFounderApplication } from "@/lib/applications/actions";
 import { FOUNDER_TRACK, nextFounderAction, trackIndex } from "@/lib/applications/stages";
 import { requireFounder } from "@/lib/auth/session";
+import { loadFounderDecision } from "@/lib/founder/load";
+import { formatReviewDate } from "@/lib/founder/outcome";
 
 export default async function DashboardIdeaPage({
   params,
@@ -26,6 +28,7 @@ export default async function DashboardIdeaPage({
   }
 
   const current = trackIndex(application.stage);
+  const decision = await loadFounderDecision(application.id);
 
   return (
     <>
@@ -60,11 +63,21 @@ export default async function DashboardIdeaPage({
           <Button href="/submit">Continue application</Button>
         </div>
       ) : null}
-      {application.stage === "declined" || application.stage === "parked" ? (
-        <p className="mt-8 max-w-xl text-sm text-mute">
-          When Pesara records an outcome, the founder-facing note will appear here. Internal
-          debate stays internal.
-        </p>
+      {decision ? (
+        <section className="mt-10 max-w-2xl border border-line px-5 py-6">
+          <p className="text-xs tracking-[0.18em] text-gold uppercase">Pesara Decision</p>
+          <h2 className="mt-3 text-2xl font-semibold">{decision.title}</h2>
+          {decision.feedback ? <p className="mt-4 text-sm whitespace-pre-wrap text-cream">{decision.feedback}</p> : null}
+          {decision.nextSteps ? (
+            <>
+              <h3 className="mt-6 text-sm text-cream">Proposed next step</h3>
+              <p className="mt-2 text-sm whitespace-pre-wrap text-mute">{decision.nextSteps}</p>
+            </>
+          ) : null}
+          {decision.reviewDate ? (
+            <p className="mt-6 text-sm text-mute">Discussion date {formatReviewDate(decision.reviewDate)}</p>
+          ) : null}
+        </section>
       ) : null}
     </>
   );

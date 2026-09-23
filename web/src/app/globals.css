@@ -88,3 +88,15 @@ select:focus-visible {
     transparent 55%
   );
 }
+
+@media print {
+  aside,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+}

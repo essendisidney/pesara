@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canAccessOwnedRecord, isStaffRole } from "../src/lib/permissions/roles";
+import { canAccessOwnedRecord, isAdminRole, isCommitteeRole, isStaffRole } from "../src/lib/permissions/roles";
 
 describe("application ownership", () => {
   it("does not let founder A read founder B", () => {
@@ -14,5 +14,9 @@ describe("application ownership", () => {
     expect(canAccessOwnedRecord("analyst-1", "founder-b", "ANALYST")).toBe(true);
     expect(isStaffRole("ADMIN")).toBe(true);
     expect(isStaffRole("FOUNDER")).toBe(false);
+    expect(isCommitteeRole("ANALYST")).toBe(false);
+    expect(isCommitteeRole("INVESTMENT_COMMITTEE")).toBe(true);
+    expect(isAdminRole("ADMIN")).toBe(true);
+    expect(isAdminRole("INVESTMENT_COMMITTEE")).toBe(false);
   });
 });

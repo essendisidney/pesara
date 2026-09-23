@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AdminShell } from "@/components/admin/shell";
 import { requireStaff } from "@/lib/auth/session";
 
+export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Admin" };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {

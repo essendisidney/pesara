@@ -1,10 +1,21 @@
-import { AdminPlaceholder } from "@/components/admin/shell";
+import { PipelineBoard } from "@/components/admin/pipeline";
+import { knownMessage, PAGE_ERRORS, parsePipelineQuery } from "@/lib/admin/pipeline";
+import { loadPipeline } from "@/lib/admin/queries";
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const query = parsePipelineQuery(params);
+  const result = await loadPipeline(query);
   return (
-    <AdminPlaceholder title="Applications">
-      Search, filters, assignment and comments arrive in Phase 3. Score is an
-      internal aid. It is not a prediction of startup success.
-    </AdminPlaceholder>
+    <PipelineBoard
+      query={query}
+      result={result}
+      notice={null}
+      error={knownMessage(PAGE_ERRORS, params.error)}
+    />
   );
 }
