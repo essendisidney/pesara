@@ -79,7 +79,7 @@ const work: readonly Work[] = [
     domain: "athigardens.com",
     href: "https://athigardens.com",
     logo: "/portfolio/athi-gardens-logo.png",
-    logoClass: "h-16 w-auto max-w-full bg-cream px-3 py-2",
+    logoClass: "h-auto w-full bg-cream p-3",
     mark: null,
   },
 ];
@@ -100,7 +100,7 @@ export default function PortfolioPage() {
             className="group block min-h-44"
           >
             <Frame className="flex h-full flex-col px-6 py-7 transition-colors group-hover:border-gold/50">
-              <div className="flex h-24 items-center">
+              <div className="flex min-h-24 items-center">
                 {item.logo ? (
                   <img
                     src={item.logo}
