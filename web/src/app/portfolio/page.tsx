@@ -6,7 +6,19 @@ import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = { title: "Portfolio" };
 
-const work = [
+type Work = {
+  name: string;
+  place: string;
+  relationship: string;
+  body: string;
+  domain: string;
+  href: string;
+  logo: string | null;
+  logoClass: string;
+  mark: { title: string; line: string; accent: string } | null;
+};
+
+const work: readonly Work[] = [
   {
     name: "Marit",
     place: "Nairobi",
@@ -16,6 +28,7 @@ const work = [
     href: "https://maritevents.com",
     logo: "/portfolio/marit-logo.png",
     logoClass: "h-24 max-w-full",
+    mark: null,
   },
   {
     name: "Jameiyah",
@@ -26,6 +39,7 @@ const work = [
     href: "https://jameiyah.com",
     logo: "/portfolio/jameiyah-mark.png",
     logoClass: "h-14 w-auto",
+    mark: null,
   },
   {
     name: "Little Scientist",
@@ -36,8 +50,39 @@ const work = [
     href: "https://littlescientist.ke",
     logo: null,
     logoClass: "",
+    mark: {
+      title: "Little Scientist",
+      line: "Big Science for Little People",
+      accent: "#ffc933",
+    },
   },
-] as const;
+  {
+    name: "Mukuna Advocates",
+    place: "Kenya",
+    relationship: "Technology by Pesara",
+    body: "A Kenyan law practice.",
+    domain: "mukunaadvocates.co.ke",
+    href: "https://mukunaadvocates.co.ke",
+    logo: null,
+    logoClass: "",
+    mark: {
+      title: "Mukuna Advocates",
+      line: "",
+      accent: "#ebe6dc",
+    },
+  },
+  {
+    name: "Athi Gardens",
+    place: "Lukenya Hills",
+    relationship: "Technology by Pesara",
+    body: "Gated plots in Lukenya Hills, about 30 minutes from Nairobi. A project of Athi Plains Holdings.",
+    domain: "athigardens.com",
+    href: "https://athigardens.com",
+    logo: "/portfolio/athi-gardens-logo.png",
+    logoClass: "h-16 w-auto max-w-full bg-cream px-3 py-2",
+    mark: null,
+  },
+];
 
 export default function PortfolioPage() {
   return (
@@ -62,16 +107,18 @@ export default function PortfolioPage() {
                     alt=""
                     className={`${item.logoClass} object-contain object-left`}
                   />
-                ) : (
+                ) : item.mark ? (
                   <div>
                     <p className="text-base font-extrabold tracking-tight text-white">
-                      Little Scientist
+                      {item.mark.title}
                     </p>
-                    <p className="text-[11px] font-semibold text-[#ffc933]">
-                      Big Science for Little People
-                    </p>
+                    {item.mark.line ? (
+                      <p className="text-[11px] font-semibold" style={{ color: item.mark.accent }}>
+                        {item.mark.line}
+                      </p>
+                    ) : null}
                   </div>
-                )}
+                ) : null}
               </div>
               <p className="mt-6 font-mono text-[11px] tracking-[0.18em] text-gold uppercase">
                 {item.relationship}
