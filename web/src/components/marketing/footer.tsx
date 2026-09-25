@@ -18,6 +18,7 @@ const groups = [
       { href: "/for-businesses", label: "For businesses" },
       { href: "/services", label: "Services" },
       { href: "/submit", label: "Submit idea" },
+      { href: "/whats-your-idea", label: "What's your idea?" },
     ],
   },
   {

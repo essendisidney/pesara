@@ -9,12 +9,14 @@ export function Field({
   onChange,
   textarea,
   type = "text",
+  autoComplete,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   textarea?: boolean;
   type?: string;
+  autoComplete?: string;
 }) {
   return (
     <label className="block text-sm">
@@ -23,6 +25,7 @@ export function Field({
         <textarea
           rows={4}
           value={value}
+          autoComplete={autoComplete}
           onChange={(event) => onChange(event.target.value)}
           className={`${fieldClass} py-3`}
         />
@@ -30,6 +33,7 @@ export function Field({
         <input
           type={type}
           value={value}
+          autoComplete={autoComplete}
           onChange={(event) => onChange(event.target.value)}
           className={`${fieldClass} h-12`}
         />
@@ -50,18 +54,28 @@ export function ChoiceSelect({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="block text-sm">
-      {label}
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className={`${fieldClass} h-12`}
-      >
-        {options.map((item) => (
-          <option key={item}>{item}</option>
-        ))}
-      </select>
-    </label>
+    <fieldset>
+      <legend className="text-sm">{label}</legend>
+      <div className="mt-3 grid gap-2">
+        {options.map((item) => {
+          const active = value === item;
+          return (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={active}
+              onClick={() => onChange(item)}
+              className={cn(
+                "min-h-12 rounded-[2px] border px-3 text-left text-base",
+                active ? "border-gold bg-gold/15 text-cream" : "border-line text-mute",
+              )}
+            >
+              {item}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 
@@ -103,7 +117,7 @@ export function ToggleSet({
               type="button"
               onClick={() => toggle(item)}
               className={cn(
-                "min-h-11 rounded-[2px] border px-3 py-2 text-left text-sm",
+                "min-h-12 rounded-[2px] border px-3 py-2 text-left text-base",
                 active ? "border-gold bg-gold/15 text-cream" : "border-line text-mute",
               )}
             >

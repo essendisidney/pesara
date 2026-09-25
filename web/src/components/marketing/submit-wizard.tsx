@@ -27,15 +27,19 @@ import { isSupabaseConfigured } from "@/lib/supabase/client";
 
 function SaveLabel({
   state,
+  online,
 }: {
   state: "saved" | "saving" | "error" | "local";
+  online: boolean;
 }) {
-  const copy = {
-    saved: "Saved",
-    saving: "Saving...",
-    error: "Unable to save — retrying",
-    local: "Saved on this device",
-  }[state];
+  const copy = online
+    ? {
+        saved: "Saved",
+        saving: "Saving...",
+        error: "Unable to save — retrying",
+        local: "Saved on this device",
+      }[state]
+    : "Saved on this device. Sync waits for a connection.";
   return <p className="text-sm text-mute">{copy}</p>;
 }
 
@@ -46,6 +50,19 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
   const [saveState, setSaveState] = useState<"saved" | "saving" | "error" | "local">("local");
   const retryCount = useRef(0);
   const timer = useRef<number | null>(null);
+  const seenOnline = useRef(false);
+  const online = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("online", onStoreChange);
+      window.addEventListener("offline", onStoreChange);
+      return () => {
+        window.removeEventListener("online", onStoreChange);
+        window.removeEventListener("offline", onStoreChange);
+      };
+    },
+    () => navigator.onLine,
+    () => true,
+  );
 
   function patch(partial: Partial<ApplicationDraft>) {
     const next = saveDraft({ ...draft, ...partial });
@@ -72,11 +89,31 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
     }
   }
 
+  const persistRef = useRef(persist);
+  persistRef.current = persist;
+
   useEffect(() => {
+    function flush() {
+      if (timer.current) {
+        window.clearTimeout(timer.current);
+        timer.current = null;
+      }
+      void persistRef.current(getDraftSnapshot());
+    }
+    window.addEventListener("pagehide", flush);
     return () => {
+      window.removeEventListener("pagehide", flush);
       if (timer.current) window.clearTimeout(timer.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!seenOnline.current) {
+      seenOnline.current = true;
+      return;
+    }
+    if (online) void persistRef.current(getDraftSnapshot());
+  }, [online]);
 
   if (draft.submitted && draft.reference) {
     return (
@@ -116,7 +153,7 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight">Submit your idea.</h1>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-          <SaveLabel state={saveState} />
+          <SaveLabel state={saveState} online={online} />
           <p className="text-xs text-mute">
             {draft.updatedAt ? `Last saved ${new Date(draft.updatedAt).toLocaleString()}` : "Not saved yet"}
           </p>
@@ -128,11 +165,11 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
         <div className="mt-10 space-y-4">
           {step === 1 ? (
             <>
-              <Field label="Full name" value={draft.fullName} onChange={(fullName) => patch({ fullName })} />
-              <Field label="Email" value={draft.email} onChange={(email) => patch({ email })} type="email" />
-              <Field label="Phone" value={draft.phone} onChange={(phone) => patch({ phone })} type="tel" />
-              <Field label="Country" value={draft.country} onChange={(country) => patch({ country })} />
-              <Field label="City" value={draft.city} onChange={(city) => patch({ city })} />
+              <Field label="Full name" value={draft.fullName} onChange={(fullName) => patch({ fullName })} autoComplete="name" />
+              <Field label="Email" value={draft.email} onChange={(email) => patch({ email })} type="email" autoComplete="email" />
+              <Field label="Phone" value={draft.phone} onChange={(phone) => patch({ phone })} type="tel" autoComplete="tel" />
+              <Field label="Country" value={draft.country} onChange={(country) => patch({ country })} autoComplete="country-name" />
+              <Field label="City" value={draft.city} onChange={(city) => patch({ city })} autoComplete="address-level2" />
               <Field label="LinkedIn (optional)" value={draft.linkedin} onChange={(linkedin) => patch({ linkedin })} />
               <Field label="Current occupation" value={draft.occupation} onChange={(occupation) => patch({ occupation })} />
               <ChoiceSelect
@@ -273,7 +310,7 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
                   <Button
                     key={title}
                     variant="line"
-                    className="h-10 px-4"
+                    className="min-h-12 px-4"
                     onClick={() => patch({ step: index + 1 })}
                   >
                     Edit {title}
@@ -290,7 +327,7 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
                     ["writtenAgreement", "Any commercial partnership requires a separate written agreement."],
                   ] as const
                 ).map(([key, label]) => (
-                  <label key={key} className="flex min-h-11 items-start gap-3">
+                  <label key={key} className="flex min-h-12 items-start gap-3 py-1">
                     <input
                       type="checkbox"
                       checked={Boolean(draft[key])}
@@ -306,7 +343,7 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
         </div>
         {error ? <p className="mt-4 text-sm text-gold">{error}</p> : null}
 
-        <div className="mt-10 flex flex-wrap gap-3">
+        <div className="sticky bottom-0 z-20 -mx-5 mt-10 flex flex-wrap gap-3 border-t border-line bg-ink/95 px-5 py-4">
           {step > 1 ? (
             <Button variant="line" onClick={() => patch({ step: step - 1 })}>
               Back

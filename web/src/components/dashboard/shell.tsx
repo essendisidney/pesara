@@ -8,6 +8,7 @@ const links = [
   ["Ideas", "/dashboard/ideas"],
   ["Applications", "/dashboard/applications"],
   ["Messages", "/dashboard/messages"],
+  ["Notices", "/dashboard/notices"],
   ["Documents", "/dashboard/documents"],
   ["Profile", "/dashboard/profile"],
 ] as const;

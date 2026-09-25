@@ -164,6 +164,13 @@ export function parsePipelineQuery(
   };
 }
 
+export function oldestFirst<T extends { submittedAt: string; reference: string }>(rows: readonly T[]): T[] {
+  return [...rows].sort(
+    (left, right) =>
+      left.submittedAt.localeCompare(right.submittedAt) || left.reference.localeCompare(right.reference),
+  );
+}
+
 export function pipelineHref(query: PipelineQuery, patch: Partial<PipelineQuery> = {}): string {
   const next = { ...query, ...patch };
   const params = new URLSearchParams();
@@ -283,6 +290,8 @@ export const PAGE_NOTICES: Record<string, string> = {
   experiment: "Validation experiment saved.",
   committee: "Committee decision recorded.",
   weights: "Dimension weights saved.",
+  document: "Document stored.",
+  message: "Message sent.",
 };
 
 export const PAGE_ERRORS: Record<string, string> = {

@@ -6,6 +6,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
 import { Button } from "@/components/ui/button";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { isReferralCode, REFERRAL_COOKIE } from "@/lib/referrals";
 
 function RegisterForm() {
   const router = useRouter();
@@ -23,10 +24,20 @@ function RegisterForm() {
       return;
     }
     const supabase = createClient();
+    const referral = document.cookie
+      .split("; ")
+      .find((item) => item.startsWith(`${REFERRAL_COOKIE}=`))
+      ?.split("=")[1];
+    const referralCode = referral ? decodeURIComponent(referral).toUpperCase() : "";
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: {
+          full_name: fullName,
+          ...(isReferralCode(referralCode) ? { referral_code: referralCode } : {}),
+        },
+      },
     });
     if (error) {
       setMessage(error.message);

@@ -132,9 +132,7 @@ export default function PortfolioPage() {
         ))}
       </div>
       <div className="mx-auto max-w-6xl px-5 pb-24">
-        <p className="max-w-xl text-sm text-mute">
-          Bring the next one. Pesara starts with the problem, then builds the company around it.
-        </p>
+        <p className="max-w-xl text-sm text-mute">Build the next one with us.</p>
         <div className="mt-6">
           <Button href="/submit">Submit Your Idea</Button>
         </div>

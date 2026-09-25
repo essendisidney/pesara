@@ -3,6 +3,7 @@ import {
   COMMAND_METRICS,
   isUuid,
   matchesSearch,
+  oldestFirst,
   nairobiDayStart,
   nairobiNextDay,
   formatMean,
@@ -16,12 +17,12 @@ import {
   applicationSections,
   decisionLabel,
   evidenceLines,
-  fileName,
   formatBytes,
   safeHttp,
   type Line,
 } from "@/lib/admin/present";
 import { experimentTypeLabel, outcomeLabel, weightedMean, type DimensionRow } from "@/lib/admin/viability";
+import { attachedDocument, documentDisplayName } from "@/lib/documents";
 import { STAFF_ROLES } from "@/lib/permissions/roles";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/validation/env";
@@ -113,8 +114,9 @@ export type ApplicationFile = {
   experiments: ExperimentView[];
   decisions: CommitteeView[];
   ventureId: string | null;
-  documents: { id: string; name: string; mime: string | null; size: string; at: string }[];
-  messages: { id: string; sender: string; body: string; at: string }[];
+  documents: { id: string; name: string; mime: string | null; size: string; at: string; kind: string | null }[];
+  threads: { id: string; subject: string }[];
+  messages: { id: string; sender: string; body: string; at: string; read: boolean; attachment: { id: string; name: string } | null }[];
   notes: { id: string; author: string; body: string; at: string }[];
   history: { id: string; from: string; to: string; actor: string; at: string }[];
   activity: { id: string; summary: string; actor: string; at: string }[];
@@ -328,6 +330,47 @@ export async function loadCommandCentre(): Promise<CommandCentre> {
   return { status: "ready", counts, live: live.ventures };
 }
 
+export type WaitingIdea = {
+  id: string;
+  reference: string;
+  idea: string;
+  country: string;
+  submittedAt: string;
+};
+
+export async function loadReadingQueue(): Promise<
+  { status: "offline" } | { status: "error" } | { status: "ready"; ideas: WaitingIdea[]; limited: boolean }
+> {
+  if (!supabaseConfigured()) return { status: "offline" };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("idea_applications")
+    .select("id, reference, payload, country, submitted_at")
+    .eq("stage", "submitted")
+    .not("submitted_at", "is", null)
+    .order("submitted_at", { ascending: true })
+    .limit(50);
+  if (error) return { status: "error" };
+  const ideas = oldestFirst(
+    records(data).flatMap((row) => {
+      const id = text(row.id);
+      const submittedAt = text(row.submitted_at);
+      if (!id || !isUuid(id) || !submittedAt) return [];
+      const draft = mergeDraft(row.payload);
+      return [
+        {
+          id,
+          reference: text(row.reference) ?? "No reference",
+          idea: draft.ideaName.trim() || "Untitled idea",
+          country: text(row.country) ?? "Not recorded",
+          submittedAt,
+        },
+      ];
+    }),
+  );
+  return { status: "ready", ideas, limited: records(data).length >= 50 };
+}
+
 async function latestScores(
   supabase: Db,
   applicationIds: readonly string[],
@@ -479,16 +522,16 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
   const applicationId = text(row.id);
   if (!applicationId) return { status: "missing" };
 
-  const [documents, messages, notes, history, activity, assessments, experiments, decisions, staff] =
+  const [documents, messages, notes, history, activity, assessments, experiments, decisions, staff, threads] =
     await Promise.all([
       supabase
         .from("application_documents")
-        .select("id, path, mime_type, byte_size, created_at")
+        .select("id, path, mime_type, byte_size, created_at, kind, title")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false }),
       supabase
         .from("messages")
-        .select("id, sender, body, created_at")
+        .select("id, sender, body, created_at, read_at, document_id")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false }),
       supabase
@@ -524,6 +567,11 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false }),
       loadStaff(supabase),
+      supabase
+        .from("message_threads")
+        .select("id, subject")
+        .eq("application_id", applicationId)
+        .order("created_at", { ascending: true }),
     ]);
 
   if (
@@ -535,7 +583,8 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
     assessments.error ||
     experiments.error ||
     decisions.error ||
-    !staff
+    !staff ||
+    threads.error
   ) {
     return { status: "error" };
   }
@@ -658,6 +707,14 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
     resultsByExperiment.set(experimentId, list);
   }
 
+  const documentNames = new Map(
+    records(documents.data).flatMap((item) => {
+      const itemId = text(item.id);
+      const path = text(item.path);
+      if (!itemId || !path) return [];
+      return [[itemId, documentDisplayName(text(item.title), path)] as const];
+    }),
+  );
   const actorName = (actorId: string | null) => (actorId ? (names.get(actorId) ?? "Unknown") : "Pesara");
   const ventureRecord = ventureResult.data;
   const ventureId =
@@ -765,12 +822,19 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
         return [
           {
             id: itemId,
-            name: fileName(path),
+            name: documentDisplayName(text(item.title), path),
             mime: text(item.mime_type),
             size: formatBytes(whole(item.byte_size)),
             at: text(item.created_at) ?? "",
+            kind: text(item.kind),
           },
         ];
+      }),
+      threads: records(threads.data).flatMap((item) => {
+        const itemId = text(item.id);
+        const subject = text(item.subject);
+        if (!itemId || !subject) return [];
+        return [{ id: itemId, subject }];
       }),
       messages: records(messages.data).flatMap((item) => {
         const itemId = text(item.id);
@@ -782,6 +846,8 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
             sender: actorName(text(item.sender)),
             body,
             at: text(item.created_at) ?? "",
+            read: Boolean(text(item.read_at)),
+            attachment: attachedDocument(text(item.document_id), documentNames),
           },
         ];
       }),

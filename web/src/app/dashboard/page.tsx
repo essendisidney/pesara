@@ -5,12 +5,17 @@ import { requireFounder } from "@/lib/auth/session";
 import { listFounderApplications } from "@/lib/applications/actions";
 import { greetingForNairobi } from "@/lib/application";
 import { nextFounderAction } from "@/lib/applications/stages";
+import { loadOwnReferral } from "@/lib/referrals-data";
+import { introductionLine } from "@/lib/referrals";
+import { site } from "@/config/site";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
   const auth = await requireFounder();
   const applications = await listFounderApplications();
+  const referral = await loadOwnReferral(auth.userId);
+  const introduced = referral ? introductionLine(referral.invites) : null;
 
   return (
     <>
@@ -67,6 +72,19 @@ export default async function DashboardPage() {
           Continue an idea →
         </Link>
       </p>
+      {referral ? (
+        <section className="mt-10 max-w-xl border border-line px-5 py-5">
+          <h2 className="text-lg font-semibold">Your introduction link</h2>
+          <p className="mt-3 font-mono text-sm text-cream">
+            {site.url.replace(/\/$/, "")}
+            {referral.path}
+          </p>
+          {introduced ? <p className="mt-3 text-sm text-cream">{introduced}</p> : null}
+          {introduced ? null : (
+            <p className="mt-3 text-sm text-mute">Introductions appear here when someone joins through this link.</p>
+          )}
+        </section>
+      ) : null}
     </>
   );
 }

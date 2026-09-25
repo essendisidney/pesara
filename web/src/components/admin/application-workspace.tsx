@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { addNoteAction, assignAnalystAction, createVentureAction, setStageAction } from "@/lib/admin/actions";
+import { replyMessageAction, uploadDocumentAction, openThreadAction } from "@/lib/founder/files";
+import { DOCUMENT_KINDS, documentKindLabel } from "@/lib/documents";
 import {
   DETAIL_TABS,
   STAFF_STAGES,
@@ -375,28 +377,58 @@ function CommitteeDecision({ decision }: { decision: ApplicationFile["decisions"
 }
 
 function DocumentsTab({ application }: { application: ApplicationFile }) {
-  if (application.documents.length === 0) {
-    return (
-      <div className="mt-8">
-        <EmptyState title="No documents have been stored" />
-      </div>
-    );
-  }
   return (
-    <ul className="mt-8 divide-y divide-line border border-line">
-      {application.documents.map((document) => (
-        <li key={document.id} className="px-5 py-4">
-          <p className="text-sm text-cream">{document.name}</p>
-          <p className="mt-1 text-xs text-mute">
-            {[document.mime, document.size, formatNairobi(document.at)].filter((item) => item && item !== "—").join(" · ")}
-          </p>
-        </li>
-      ))}
-    </ul>
+    <>
+      {application.documents.length === 0 ? (
+        <div className="mt-8">
+          <EmptyState title="No documents have been stored" />
+        </div>
+      ) : (
+        <ul className="mt-8 divide-y divide-line border border-line">
+          {application.documents.map((document) => (
+            <li key={document.id} className="px-5 py-4">
+              <p className="text-sm text-cream">{document.name}</p>
+              <p className="mt-1 text-xs text-mute">
+                {[documentKindLabel(document.kind), document.mime, document.size, formatNairobi(document.at)]
+                  .filter((item) => item && item !== "—")
+                  .join(" · ")}
+              </p>
+              <a href={`/files/${document.id}`} className="mt-2 inline-flex min-h-11 items-center text-sm text-gold">
+                Open file
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      <form action={uploadDocumentAction} className="mt-8 grid max-w-xl gap-4">
+        <input type="hidden" name="applicationId" value={application.id} />
+        <input type="hidden" name="next" value="admin" />
+        <label className="text-sm text-cream">
+          Kind
+          <select name="kind" className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3">
+            {DOCUMENT_KINDS.map((kind) => (
+              <option key={kind} value={kind}>
+                {documentKindLabel(kind)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-sm text-cream">
+          Title
+          <input name="title" maxLength={160} className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3" />
+        </label>
+        <label className="text-sm text-cream">
+          File
+          <input name="file" type="file" required accept=".pdf,.png,.jpg,.jpeg,.webp,.docx,.xlsx,.pptx" className="mt-2 block w-full text-sm" />
+        </label>
+        <Button type="submit">Store document</Button>
+      </form>
+    </>
   );
 }
 
 function MessagesTab({ application }: { application: ApplicationFile }) {
+  const thread = application.threads[0];
   return (
     <Panel title="Messages">
       <p className="text-sm text-mute">Shared with the founder on this application.</p>
@@ -405,12 +437,77 @@ function MessagesTab({ application }: { application: ApplicationFile }) {
         {application.messages.map((message) => (
           <li key={message.id} className="border-t border-line pt-4">
             <p className="text-xs text-mute">
-              {message.sender} · {formatNairobi(message.at)}
+              {message.sender} · {formatNairobi(message.at)} · {message.read ? "Read" : "Unread"}
             </p>
             <p className="mt-2 text-sm whitespace-pre-wrap text-cream">{message.body}</p>
+            {message.attachment ? (
+              <a href={`/files/${message.attachment.id}`} className="mt-2 inline-flex min-h-11 items-center text-sm text-gold">
+                {message.attachment.name}
+              </a>
+            ) : null}
           </li>
         ))}
       </ul>
+      {application.threads.length > 0 ? (
+        <form action={replyMessageAction} className="mt-6 grid gap-4">
+          <input type="hidden" name="applicationId" value={application.id} />
+          {application.threads.length === 1 && thread ? <input type="hidden" name="threadId" value={thread.id} /> : null}
+          {application.threads.length > 1 ? (
+            <label className="text-sm text-cream">
+              Thread
+              <select name="threadId" className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3">
+                {application.threads.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.subject}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="text-sm text-cream">
+            Reply
+            <textarea name="body" required maxLength={4000} rows={4} className="mt-2 w-full min-h-28 rounded-[2px] border border-line bg-ink-2/80 px-3 py-3" />
+          </label>
+          {application.documents.length > 0 ? (
+            <label className="text-sm text-cream">
+              Attachment
+              <select name="documentId" className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3">
+                <option value="">No document</option>
+                {application.documents.map((document) => (
+                  <option key={document.id} value={document.id}>
+                    {document.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <Button type="submit">Send</Button>
+        </form>
+      ) : (
+        <form action={openThreadAction} className="mt-6 grid gap-4">
+          <input type="hidden" name="applicationId" value={application.id} />
+          <input type="hidden" name="next" value="admin" />
+          <input type="hidden" name="subject" value="Application" />
+          <label className="text-sm text-cream">
+            Message the founder
+            <textarea name="body" required maxLength={4000} rows={4} className="mt-2 w-full min-h-28 rounded-[2px] border border-line bg-ink-2/80 px-3 py-3" />
+          </label>
+          {application.documents.length > 0 ? (
+            <label className="text-sm text-cream">
+              Attachment
+              <select name="documentId" className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3">
+                <option value="">No document</option>
+                {application.documents.map((document) => (
+                  <option key={document.id} value={document.id}>
+                    {document.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <Button type="submit">Send</Button>
+        </form>
+      )}
     </Panel>
   );
 }

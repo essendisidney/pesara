@@ -8,6 +8,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/how-it-works",
     "/portfolio",
     "/submit",
+    "/idea-check",
+    "/whats-your-idea",
     "/for-founders",
     "/for-businesses",
     "/services",

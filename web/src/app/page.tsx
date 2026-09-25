@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { Eyebrow, Frame } from "@/components/marketing/frame";
@@ -55,8 +56,14 @@ const flywheel = [
   "More founders",
 ];
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const metrics = await getPublicMetrics();
+  const query = await searchParams;
+  const waitlist = typeof query.waitlist === "string" ? query.waitlist : null;
 
   return (
     <SiteShell>
@@ -77,10 +84,18 @@ export default async function HomePage() {
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
               <Button href="/submit">Submit Your Idea</Button>
+              <Button href="/idea-check" variant="line">
+                Test My Idea
+              </Button>
               <Button href="/how-it-works" variant="line">
                 See How It Works
               </Button>
             </div>
+            <p className="mt-6 text-sm text-mute">
+              <Link href="/whats-your-idea" className="text-gold">
+                What&apos;s your idea?
+              </Link>
+            </p>
           </div>
           <div className="relative">
             <UrbanField />
@@ -127,8 +142,7 @@ export default async function HomePage() {
             </div>
           ) : (
             <p className="mt-8 max-w-2xl text-mute">
-              Pesara is in formation. Pipeline numbers will appear here when
-              applications exist. We will not invent them.
+              The public pipeline opens when there is real activity to show.
             </p>
           )}
         </div>
@@ -213,8 +227,7 @@ export default async function HomePage() {
             Every company makes Pesara smarter.
           </h2>
           <p className="mt-5 max-w-2xl text-sm text-mute">
-            This is the intended flywheel. We will not claim proprietary performance
-            advantages until the evidence exists.
+            Each company adds market knowledge, reusable technology, and a clearer path for the next idea.
           </p>
           <div className="mt-10 flex flex-wrap gap-2">
             {flywheel.map((item) => (
@@ -236,9 +249,9 @@ export default async function HomePage() {
             Not ready to submit?
           </h2>
           <p className="mt-5 max-w-xl text-mute">
-            Join the Pesara community. We will not tick marketing consent for you.
+            Join the Pesara community. Marketing email stays optional.
           </p>
-          <WaitlistForm />
+          <WaitlistForm status={waitlist} />
         </div>
       </section>
 
@@ -254,8 +267,8 @@ export default async function HomePage() {
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Button href="/submit">Submit Your Idea</Button>
-            <Button href="/contact" variant="line">
-              Talk to Pesara
+            <Button href="/idea-check" variant="line">
+              Test My Idea
             </Button>
           </div>
         </div>

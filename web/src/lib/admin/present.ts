@@ -193,12 +193,40 @@ export function activitySummary(
       return "Internal note added";
     case "ASSESSMENT_RECORDED":
       return metadata.version ? `Opportunity assessment version ${metadata.version} recorded` : "Opportunity assessment recorded";
+    case "ASSESSMENT_CREATED":
+      return metadata.version ? `Opportunity assessment version ${metadata.version} created` : "Opportunity assessment created";
+    case "ASSESSMENT_UPDATED":
+      return metadata.version ? `Opportunity assessment version ${metadata.version} updated` : "Opportunity assessment updated";
+    case "VALIDATION_STARTED":
+      return "Validation started";
     case "EXPERIMENT_RECORDED":
       return "Validation experiment recorded";
+    case "EXPERIMENT_COMPLETED":
+      return "Validation experiment completed";
     case "COMMITTEE_DECIDED":
       return `Committee recorded ${decisionLabel(metadata.decision ?? "")}`;
     case "VENTURE_CREATED":
       return "Venture created";
+    case "DOCUMENT_UPLOADED":
+      return "Document uploaded";
+    case "MESSAGE_SENT":
+      return "Message sent";
+    case "FOUNDER_NOTE":
+      return "Internal founder note added";
+    case "MEETING_RECORDED":
+      return "Meeting recorded";
+    case "ARTICLE_SAVED":
+      return "Article saved";
+    case "ACCOUNT_REQUESTED":
+      return metadata.kind === "deletion" ? "Deletion requested" : metadata.kind === "export" ? "Export requested" : "Account request recorded";
+    case "ACCOUNT_REQUEST_RECORDED":
+      return "Account request marked recorded";
+    case "CONSENT_RECORDED":
+      return metadata.choice === "granted"
+        ? "Marketing consent granted"
+        : metadata.choice === "withdrawn"
+          ? "Marketing consent withdrawn"
+          : "Marketing consent recorded";
     default:
       return "Recorded activity";
   }

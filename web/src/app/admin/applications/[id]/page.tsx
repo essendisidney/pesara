@@ -3,6 +3,7 @@ import { ApplicationWorkspace } from "@/components/admin/application-workspace";
 import { EmptyState } from "@/components/ui/empty-state";
 import { knownMessage, PAGE_ERRORS, PAGE_NOTICES, parseDetailTab } from "@/lib/admin/pipeline";
 import { loadApplicationDetail } from "@/lib/admin/queries";
+import { markApplicationThreadsRead } from "@/lib/founder/inbox";
 import { getAuthContext } from "@/lib/auth/session";
 import { isAdminRole, isCommitteeRole } from "@/lib/permissions/roles";
 
@@ -15,6 +16,8 @@ export default async function Page({
 }) {
   const { id } = await params;
   const query = await searchParams;
+  const tab = parseDetailTab(query.tab);
+  if (tab === "messages") await markApplicationThreadsRead(id);
   const result = await loadApplicationDetail(id);
 
   if (result.status === "missing") {
@@ -37,7 +40,7 @@ export default async function Page({
   return (
     <ApplicationWorkspace
       application={result.application}
-      tab={parseDetailTab(query.tab)}
+      tab={tab}
       notice={knownMessage(PAGE_NOTICES, query.notice)}
       error={knownMessage(PAGE_ERRORS, query.error)}
       canRecordDecision={isCommitteeRole(auth?.role)}

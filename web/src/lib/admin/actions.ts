@@ -227,6 +227,24 @@ export async function saveWeightsAction(formData: FormData) {
   redirect("/admin/viability?notice=weights");
 }
 
+export async function setPublicMetricsAction(formData: FormData) {
+  const auth = await getAuthContext();
+  if (!auth || !isAdminRole(auth.role)) redirect("/admin/settings?error=invalid");
+  const flags = {
+    ideas_submitted: formData.get("ideas_submitted") === "on",
+    under_review: formData.get("under_review") === "on",
+    in_validation: formData.get("in_validation") === "on",
+    being_built: formData.get("being_built") === "on",
+    launched: formData.get("launched") === "on",
+  };
+  const supabase = await staffClient();
+  const { error } = await supabase.rpc("set_public_metrics", { p_flags: flags });
+  if (error) redirect(`/admin/settings?error=${failureCode(error.message)}`);
+  revalidatePath("/");
+  revalidatePath("/admin/settings");
+  redirect("/admin/settings?notice=metrics");
+}
+
 function ventureId(formData: FormData): string | null {
   const value = formData.get("ventureId");
   if (typeof value !== "string" || !isUuid(value)) return null;

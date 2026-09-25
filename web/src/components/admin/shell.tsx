@@ -10,6 +10,7 @@ const links = [
   ["Pipeline", "/admin/pipeline"],
   ["Analytics", "/admin/analytics"],
   ["Content", "/admin/content"],
+  ["Inquiries", "/admin/inquiries"],
   ["Settings", "/admin/settings"],
 ] as const;
 
@@ -31,25 +32,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
         </aside>
         <main className="flex-1 px-5 py-10">{children}</main>
       </div>
-    </div>
-  );
-}
-
-export function AdminPlaceholder({
-  title,
-  children,
-}: {
-  title: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div>
-      <p className="text-xs tracking-[0.18em] text-gold uppercase">Admin</p>
-      <h1 className="mt-3 text-2xl font-semibold">{title}</h1>
-      <p className="mt-3 max-w-xl text-sm text-mute">
-        {children ??
-          "Tables, assignment, comments and viability scores land here in Phase 3. Internal notes never render on founder views."}
-      </p>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   nairobiDayStart,
   nairobiNextDay,
   parsePipelineQuery,
+  oldestFirst,
   pipelineHref,
   sortPipelineRows,
   stageLabel,
@@ -137,6 +138,18 @@ describe("application file", () => {
     );
     expect(JSON.stringify(sections)).not.toContain("Not assessed");
     expect(evidenceLines(draft)[0]?.value).toBe("Spoken to potential customers");
+  });
+});
+
+describe("reading queue", () => {
+  it("keeps the oldest submitted idea first", () => {
+    expect(
+      oldestFirst([
+        { submittedAt: "2026-09-02T08:00:00.000Z", reference: "PSR-2026-BBBBBB" },
+        { submittedAt: "2026-09-01T08:00:00.000Z", reference: "PSR-2026-CCCCCC" },
+        { submittedAt: "2026-09-01T08:00:00.000Z", reference: "PSR-2026-AAAAAA" },
+      ]).map((item) => item.reference),
+    ).toEqual(["PSR-2026-AAAAAA", "PSR-2026-CCCCCC", "PSR-2026-BBBBBB"]);
   });
 });
 

@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { EmptyState, MetricCard } from "@/components/ui/empty-state";
+import { formatNairobi } from "@/lib/admin/present";
 import { COMMAND_METRICS } from "@/lib/admin/pipeline";
-import { loadCommandCentre } from "@/lib/admin/queries";
+import { loadCommandCentre, loadReadingQueue } from "@/lib/admin/queries";
+import { loadOpenAccountRequests } from "@/lib/admin/office-data";
+import { accountRequestLabel } from "@/lib/account-requests";
+import { recordAccountRequestAction } from "@/lib/account-actions";
 
 export default async function AdminPage() {
-  const centre = await loadCommandCentre();
+  const [centre, queue, requests] = await Promise.all([loadCommandCentre(), loadReadingQueue(), loadOpenAccountRequests()]);
 
   return (
     <>
@@ -61,6 +65,81 @@ export default async function AdminPage() {
           </p>
         </>
       ) : null}
+      {centre.status !== "offline" ? <ReadingQueue queue={queue} /> : null}
+      {centre.status !== "offline" ? <AccountRequests requests={requests} /> : null}
     </>
+  );
+}
+
+function ReadingQueue({ queue }: { queue: Awaited<ReturnType<typeof loadReadingQueue>> }) {
+  return (
+    <section className="mt-12 max-w-3xl">
+      <h2 className="text-lg font-semibold">Waiting to be read</h2>
+      <p className="mt-2 text-sm text-mute">
+        Submitted ideas, oldest first. A person reads each one before it moves into screening. There is no quota and no public rank.
+      </p>
+      {queue.status === "error" ? <p className="mt-4 text-sm text-mute">The reading list could not be loaded.</p> : null}
+      {queue.status === "ready" && queue.ideas.length === 0 ? (
+        <p className="mt-4 text-sm text-mute">No idea is waiting to be read.</p>
+      ) : null}
+      {queue.status === "ready" && queue.ideas.length > 0 ? (
+        <>
+          {queue.limited ? <p className="mt-4 text-sm text-mute">This list is the oldest 50 ideas still waiting.</p> : null}
+          <ol className="mt-4 divide-y divide-line border border-line">
+            {queue.ideas.map((idea, index) => (
+              <li key={idea.id}>
+                <Link href={`/admin/applications/${idea.id}`} className="flex items-baseline justify-between gap-4 px-5 py-4">
+                  <span>
+                    <span className="text-xs text-mute">{index + 1}</span>
+                    <span className="ml-3 text-sm text-cream">{idea.idea}</span>
+                    <span className="mt-1 block font-mono text-[11px] tracking-[0.16em] text-gold">{idea.reference}</span>
+                  </span>
+                  <span className="text-right text-sm text-mute">
+                    {idea.country}
+                    <span className="mt-1 block">{formatNairobi(idea.submittedAt)}</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : null}
+    </section>
+  );
+}
+
+function AccountRequests({ requests }: { requests: Awaited<ReturnType<typeof loadOpenAccountRequests>> }) {
+  return (
+    <section className="mt-12 max-w-3xl">
+      <h2 className="text-lg font-semibold">Account requests</h2>
+      <p className="mt-2 text-sm text-mute">Export and deletion requests. Marking one recorded does not delete the account or send a file.</p>
+      {requests.status === "error" ? <p className="mt-4 text-sm text-mute">Account requests could not be loaded.</p> : null}
+      {requests.status === "ready" && requests.requests.length === 0 ? (
+        <p className="mt-4 text-sm text-mute">No open account requests.</p>
+      ) : null}
+      {requests.status === "ready" && requests.requests.length > 0 ? (
+        <ul className="mt-4 divide-y divide-line border border-line">
+          {requests.requests.map((request) => (
+            <li key={request.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+              <span>
+                <Link href={`/admin/founders/${request.founderId}`} className="text-sm text-cream">
+                  {request.name}
+                </Link>
+                <span className="mt-1 block text-xs text-mute">
+                  {accountRequestLabel(request.kind)} · {formatNairobi(request.at)}
+                </span>
+              </span>
+              <form action={recordAccountRequestAction}>
+                <input type="hidden" name="requestId" value={request.id} />
+                <input type="hidden" name="founderId" value={request.founderId} />
+                <button type="submit" className="min-h-11 text-sm text-gold">
+                  Mark recorded
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
   );
 }

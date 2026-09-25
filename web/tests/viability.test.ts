@@ -55,5 +55,14 @@ describe("sprint 3 activity", () => {
     expect(activitySummary("ASSESSMENT_RECORDED", { version: "2", note: "secret" }, new Map())).toBe(
       "Opportunity assessment version 2 recorded",
     );
+    expect(activitySummary("ASSESSMENT_CREATED", { version: "1", note: "secret" }, new Map())).toBe(
+      "Opportunity assessment version 1 created",
+    );
+    expect(activitySummary("VALIDATION_STARTED", { from_stage: "screening", note: "secret" }, new Map())).toBe(
+      "Validation started",
+    );
+    expect(activitySummary("EXPERIMENT_COMPLETED", { experiment_id: "secret", conclusion: "secret" }, new Map())).toBe(
+      "Validation experiment completed",
+    );
   });
 });
