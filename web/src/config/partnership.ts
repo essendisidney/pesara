@@ -38,7 +38,7 @@ export const SHARES = [
     key: "platform",
     name: "Platform fee",
     range: formatRange(TERMS.platformFee),
-    body: "A small fee on money collected through Pesara Rails, for as long as the product runs on them. It pays for payments, hosting, security and upgrades.",
+    body: "A small fee on the venture's own revenue collected through Pesara Rails. Never on money the venture holds for its customers. It pays for payments, hosting, security and upgrades.",
   },
 ] as const;
 
@@ -126,14 +126,23 @@ export function illustrate(example: Example = EXAMPLE) {
     monthsToCap,
     ventureKeepsEarly,
     ventureKeepsLater,
-    keepsEarlyPercent: (ventureKeepsEarly / example.monthlyRevenue) * 100,
-    keepsLaterPercent: (ventureKeepsLater / example.monthlyRevenue) * 100,
+    keepsEarlyPercent: example.monthlyRevenue > 0 ? (ventureKeepsEarly / example.monthlyRevenue) * 100 : 100 - example.revenueShare - example.platformFee,
+    keepsLaterPercent: example.monthlyRevenue > 0 ? (ventureKeepsLater / example.monthlyRevenue) * 100 : 100 - example.tail - example.platformFee,
   };
 }
 
 export function kes(value: number): string {
   return `KES ${Math.round(value).toLocaleString("en-KE")}`;
 }
+
+/** Build sizes the calculator offers. Illustrative, not quotes. */
+export const BUILD_SIZES = [
+  { key: "small", label: "Focused", note: "One core flow, web and M-Pesa", cost: 1_500_000 },
+  { key: "medium", label: "Standard", note: "Web, mobile, payments, admin", cost: 3_000_000 },
+  { key: "large", label: "Platform", note: "Multi-party, ledgers, integrations", cost: 6_000_000 },
+] as const;
+
+export const REVENUE_PRESETS = [250_000, 1_000_000, 2_000_000, 5_000_000] as const;
 
 export type SplitLine = { key: "venture" | "revenue" | "platform"; label: string; amount: number; percent: number };
 

@@ -12,6 +12,9 @@ import { formatReviewDate } from "@/lib/founder/outcome";
 import { loadFounderVenture } from "@/lib/founder/venture-data";
 import { loadFounderDocumentRequests } from "@/lib/founder/inbox";
 import { formatNairobi } from "@/lib/admin/present";
+import { answerClock, formatDue } from "@/lib/answer-clock";
+import { groupFingerprint, ideaFingerprint } from "@/lib/fingerprint";
+import { FIRST_ANSWER_WORKING_DAYS } from "@/config/promises";
 
 export default async function DashboardIdeaPage({
   params,
@@ -42,6 +45,11 @@ export default async function DashboardIdeaPage({
   const team = await loadOwnTeam(application.id);
   const venture = await loadFounderVenture(application.id);
   const requests = await loadFounderDocumentRequests(application.id);
+  const clock = answerClock(application.stage, application.submitted_at);
+  const fingerprint =
+    application.reference && application.submitted_at
+      ? ideaFingerprint(application.payload, application.reference, application.submitted_at)
+      : null;
 
   return (
     <>
@@ -53,6 +61,37 @@ export default async function DashboardIdeaPage({
       </h1>
       <p className="mt-3 max-w-2xl text-mute">{application.payload.oneLiner}</p>
       <p className="mt-4 text-sm text-mute">{nextFounderAction(application.stage)}</p>
+
+      {clock.state === "due" || clock.state === "overdue" ? (
+        <div className="mt-6 max-w-2xl rounded-[6px] border border-gold/40 bg-gold/5 px-5 py-4">
+          <p className="text-sm text-cream">
+            Written first answer due by <strong className="font-medium">{formatDue(clock.dueAt)}</strong>
+          </p>
+          <p className="mt-1 text-xs text-mute">
+            {clock.state === "due"
+              ? `Pesara promises a written answer within ${FIRST_ANSWER_WORKING_DAYS} working days. ${clock.workingDaysLeft} working ${clock.workingDaysLeft === 1 ? "day" : "days"} left.`
+              : `This is past Pesara's ${FIRST_ANSWER_WORKING_DAYS}-working-day promise. The team has been flagged.`}
+          </p>
+        </div>
+      ) : null}
+
+      {fingerprint ? (
+        <div className="mt-4 max-w-2xl rounded-[6px] border border-line px-5 py-4">
+          <p className="text-xs tracking-[0.14em] text-mute uppercase">Idea fingerprint</p>
+          <p className="mt-2 font-mono text-lg tracking-[0.08em] text-cream" title={fingerprint}>
+            {groupFingerprint(fingerprint)}
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-mute">
+            A SHA-256 fingerprint of your idea name, summary, problem, customer, solution and money flow,
+            with reference {application.reference} and submission time {formatNairobi(application.submitted_at)}.
+            Keep it. It shows exactly what you sent and when. Only the review team reads your application.
+          </p>
+          <details className="mt-2 text-xs text-mute">
+            <summary className="cursor-pointer text-gold">Show full fingerprint</summary>
+            <p className="mt-2 font-mono break-all text-cream/80">{fingerprint}</p>
+          </details>
+        </div>
+      ) : null}
 
       <ol className="mt-10 space-y-0">
         {FOUNDER_TRACK.map((item, index) => {

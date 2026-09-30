@@ -13,7 +13,7 @@ export function PageIntro({
   return (
     <header className="mx-auto max-w-6xl px-5 pt-20 pb-12">
       {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
-      <h1 className="mt-5 max-w-3xl text-4xl leading-[1.05] font-medium tracking-[-0.045em] sm:text-6xl">
+      <h1 className="display mt-5 max-w-3xl text-5xl leading-[1.02] text-balance sm:text-7xl">
         {title}
       </h1>
       {children ? (

@@ -49,7 +49,8 @@ describe("co-build partnership", () => {
     expect(page).toContain("Pesara Rails is in development");
     const home = readFileSync(path.join(root, "web/src/app/page.tsx"), "utf8");
     expect(home).toContain("We get paid when you get paid.");
-    expect(home).toContain("Pesara Rails is in development");
+    expect(home).toContain("<KeepCalculator />");
+    expect(home).toContain("PROMISES.map");
     expect(existsSync(path.join(root, "supabase/migrations/20260930110000_pesara_os_rails_fit.sql"))).toBe(true);
   });
 });

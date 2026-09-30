@@ -12,6 +12,7 @@ import {
   type SortKey,
 } from "@/lib/admin/pipeline";
 import { formatNairobi } from "@/lib/admin/present";
+import { answerClock, formatDue } from "@/lib/answer-clock";
 import type { PipelineResult, StaffOption } from "@/lib/admin/queries";
 
 const controlClass =
@@ -19,6 +20,26 @@ const controlClass =
 
 function show(value: string): string {
   return value.trim() ? value : "—";
+}
+
+/** Keeps the public "written answer in N working days" promise visible to staff. */
+function AnswerDue({ stage, submittedAt }: { stage: string; submittedAt: string | null }) {
+  const clock = answerClock(stage, submittedAt);
+  if (clock.state === "due") {
+    return (
+      <span className="mt-1 block text-xs text-mute">
+        Answer due {formatDue(clock.dueAt)} · {clock.workingDaysLeft}d left
+      </span>
+    );
+  }
+  if (clock.state === "overdue") {
+    return (
+      <span className="mt-1 block text-xs font-medium text-gold">
+        Overdue {clock.workingDaysLate}d · was due {formatDue(clock.dueAt)}
+      </span>
+    );
+  }
+  return null;
 }
 
 function SortLink({
@@ -232,7 +253,10 @@ function Results({ query, result }: { query: PipelineQuery; result: PipelineResu
                 <td className="px-3 py-3">{row.founder}</td>
                 <td className="px-3 py-3">{show(row.country)}</td>
                 <td className="px-3 py-3">{show(row.sector)}</td>
-                <td className="px-3 py-3 whitespace-nowrap">{formatNairobi(row.submittedAt)}</td>
+                <td className="px-3 py-3 whitespace-nowrap">
+                  {formatNairobi(row.submittedAt)}
+                  <AnswerDue stage={row.stage} submittedAt={row.submittedAt} />
+                </td>
                 <td className="px-3 py-3 whitespace-nowrap">{stageLabel(row.stage)}</td>
                 <td className="px-3 py-3">{row.analyst}</td>
                 <td className="px-3 py-3 whitespace-nowrap">{formatMean(row.assessmentMean)}</td>

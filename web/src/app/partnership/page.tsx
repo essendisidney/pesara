@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
 import { Eyebrow, Frame } from "@/components/marketing/frame";
 import { Button } from "@/components/ui/button";
+import { KeepCalculator } from "@/components/marketing/keep-calculator";
 import {
   EXAMPLE,
   PROTECTIONS,
@@ -87,7 +88,7 @@ export default function PartnershipPage() {
 
       <section className="mx-auto max-w-6xl px-5 py-20">
         <Eyebrow>The three shares</Eyebrow>
-        <h2 className="mt-5 max-w-3xl text-3xl font-medium tracking-[-0.04em] sm:text-4xl">
+        <h2 className="mt-5 max-w-3xl display text-4xl leading-[1.05] sm:text-5xl">
           How Pesara is paid.
         </h2>
         <div className="mt-10 divide-y divide-line border-y border-line">
@@ -106,7 +107,7 @@ export default function PartnershipPage() {
       <section className="border-y border-line bg-ink-2/80">
         <div className="mx-auto max-w-6xl px-5 py-20">
           <Eyebrow>Worked example</Eyebrow>
-          <h2 className="mt-5 max-w-3xl text-3xl font-medium tracking-[-0.04em] sm:text-4xl">
+          <h2 className="mt-5 max-w-3xl display text-4xl leading-[1.05] sm:text-5xl">
             A venture earning {kes(EXAMPLE.monthlyRevenue)} a month.
           </h2>
           <p className="mt-4 max-w-2xl text-sm text-mute">
@@ -170,9 +171,19 @@ export default function PartnershipPage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 pt-20">
+        <Eyebrow>Your numbers</Eyebrow>
+        <h2 className="display mt-5 max-w-3xl text-4xl leading-[1.05] sm:text-5xl">
+          Try it with your own revenue.
+        </h2>
+        <div className="mt-10">
+          <KeepCalculator />
+        </div>
+      </section>
+
       <section className="mx-auto max-w-6xl px-5 py-20">
         <Eyebrow>Collection</Eyebrow>
-        <h2 className="mt-5 max-w-3xl text-3xl font-medium tracking-[-0.04em] sm:text-4xl">
+        <h2 className="mt-5 max-w-3xl display text-4xl leading-[1.05] sm:text-5xl">
           The split happens when the money settles.
         </h2>
         <ol className="mt-10 grid gap-px bg-line md:grid-cols-3">
@@ -196,7 +207,7 @@ export default function PartnershipPage() {
       <section className="border-y border-line">
         <div className="mx-auto max-w-6xl px-5 py-20">
           <Eyebrow>Protection</Eyebrow>
-          <h2 className="mt-5 max-w-3xl text-3xl font-medium tracking-[-0.04em] sm:text-4xl">
+          <h2 className="mt-5 max-w-3xl display text-4xl leading-[1.05] sm:text-5xl">
             Written so both sides can trust it.
           </h2>
           <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -212,7 +223,7 @@ export default function PartnershipPage() {
 
       <section className="mx-auto max-w-6xl px-5 py-20">
         <Eyebrow>When it&apos;s a fee instead</Eyebrow>
-        <h2 className="mt-5 max-w-3xl text-3xl font-medium tracking-[-0.04em] sm:text-4xl">
+        <h2 className="mt-5 max-w-3xl display text-4xl leading-[1.05] sm:text-5xl">
           Not every idea fits a co-build.
         </h2>
         <p className="mt-5 max-w-2xl text-mute">
