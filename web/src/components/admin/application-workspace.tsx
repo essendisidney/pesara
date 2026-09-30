@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { addNoteAction, assignAnalystAction, createVentureAction, setStageAction } from "@/lib/admin/actions";
+import { addNoteAction, assignAnalystAction, createVentureAction, requestDocumentAction, setStageAction } from "@/lib/admin/actions";
 import { replyMessageAction, uploadDocumentAction, openThreadAction } from "@/lib/founder/files";
 import { DOCUMENT_KINDS, documentKindLabel } from "@/lib/documents";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/lib/admin/pipeline";
 import { formatNairobi, roleLabel, type Line } from "@/lib/admin/present";
 import type { ApplicationFile } from "@/lib/admin/queries";
-import { AssessmentForm, AssessmentSummary, CommitteeForm, ExperimentForm, scoreCaption } from "@/components/admin/review-forms";
+import { AssessmentForm, AssessmentSummary, CommitteeForm, CompleteExperimentForm, ExperimentForm, scoreCaption } from "@/components/admin/review-forms";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 
@@ -127,6 +127,21 @@ function Overview({
             { label: "Stage", value: stageLabel(application.stage) },
           ]}
         />
+      </Panel>
+      <Panel title="Team">
+        <p className="text-sm text-mute">Named by the founder on this application.</p>
+        {application.team.length === 0 ? (
+          <p className="mt-4 text-sm text-mute">No team members named.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-line border border-line">
+            {application.team.map((member) => (
+              <li key={member.id} className="px-5 py-4 text-sm text-cream">
+                {member.name}
+                {member.role ? <span className="mt-1 block text-xs text-mute">{member.role}</span> : null}
+              </li>
+            ))}
+          </ul>
+        )}
       </Panel>
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         <form action={assignAnalystAction} className="border border-line px-5 py-6">
@@ -297,6 +312,7 @@ function ValidationTab({ application }: { application: ApplicationFile }) {
               ) : null}
             </div>
           ))}
+          {experiment.open ? <CompleteExperimentForm applicationId={application.id} experimentId={experiment.id} /> : null}
         </Panel>
       ))}
       <ExperimentForm applicationId={application.id} />
@@ -379,6 +395,45 @@ function CommitteeDecision({ decision }: { decision: ApplicationFile["decisions"
 function DocumentsTab({ application }: { application: ApplicationFile }) {
   return (
     <>
+      <section className="mt-8 max-w-xl">
+        <h2 className="text-lg font-semibold">Asked for</h2>
+        <p className="mt-2 text-sm text-mute">
+          The founder sees the kind and the note on their documents page. The notice stays in the app. It does not send an email.
+        </p>
+        {application.documentRequests.length === 0 ? (
+          <p className="mt-4 text-sm text-mute">No document has been requested.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-line border border-line">
+            {application.documentRequests.map((request) => (
+              <li key={request.id} className="px-5 py-4">
+                <p className="text-sm text-cream">{documentKindLabel(request.kind)}</p>
+                {request.note ? <p className="mt-2 text-sm whitespace-pre-wrap text-cream">{request.note}</p> : null}
+                <p className="mt-2 text-xs text-mute">{formatNairobi(request.at)}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <form action={requestDocumentAction} className="mt-4 grid gap-4">
+          <input type="hidden" name="applicationId" value={application.id} />
+          <label className="text-sm text-cream">
+            Kind
+            <select name="kind" className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3">
+              {DOCUMENT_KINDS.map((kind) => (
+                <option key={kind} value={kind}>
+                  {documentKindLabel(kind)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm text-cream">
+            Note
+            <input name="note" maxLength={160} className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3" />
+          </label>
+          <Button type="submit" variant="line">
+            Ask for this document
+          </Button>
+        </form>
+      </section>
       {application.documents.length === 0 ? (
         <div className="mt-8">
           <EmptyState title="No documents have been stored" />

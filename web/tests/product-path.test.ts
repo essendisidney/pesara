@@ -46,9 +46,11 @@ describe("product path", () => {
     const sql = migrations();
     for (const fn of [
       "public.submit_application",
+      "public.withdraw_application",
       "private.next_application_reference",
       "public.assign_application_analyst",
       "public.save_viability_assessment",
+      "public.complete_validation_experiment",
       "public.set_application_stage",
       "public.record_committee_decision",
       "public.founder_decision_view",
@@ -56,6 +58,7 @@ describe("product path", () => {
       "public.update_venture_workspace",
       "public.public_pipeline",
       "public.submit_inquiry",
+      "public.mark_inquiry_handled",
       "public.request_account_action",
       "public.record_account_request",
       "public.join_waitlist",
@@ -63,6 +66,15 @@ describe("product path", () => {
       "public.mark_notification_read",
       "public.set_marketing_consent",
       "public.update_founder_profile",
+      "public.complete_venture_milestone",
+      "public.register_venture_document",
+      "public.founder_venture_view",
+      "public.record_venture_snapshot",
+      "public.set_venture_publication",
+      "public.set_staff_role",
+      "public.request_application_document",
+      "public.add_team_member",
+      "public.remove_team_member",
     ]) {
       expect(sql, fn).toContain(`function ${fn}`);
     }

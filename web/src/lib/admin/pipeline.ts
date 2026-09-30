@@ -288,9 +288,11 @@ export const PAGE_NOTICES: Record<string, string> = {
   note: "Internal note saved.",
   assessment: "Assessment saved.",
   experiment: "Validation experiment saved.",
+  "experiment-closed": "Experiment outcome recorded.",
   committee: "Committee decision recorded.",
   weights: "Dimension weights saved.",
   document: "Document stored.",
+  "document-request": "Document requested.",
   message: "Message sent.",
 };
 

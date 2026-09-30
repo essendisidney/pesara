@@ -38,7 +38,7 @@ export type VentureWorkspace = {
   technologyNotes: string | null;
   founders: { id: string; name: string }[];
   milestones: { id: string; title: string; dueOn: string | null; completedAt: string | null }[];
-  kpis: { id: string; label: string; value: string; capturedOn: string | null }[];
+  kpis: { id: string; label: string; value: string; capturedOn: string | null; earlier: { id: string; value: string; capturedOn: string | null }[] }[];
   documents: { id: string; title: string; at: string }[];
   notes: { id: string; author: string; body: string; at: string }[];
 };
@@ -139,7 +139,7 @@ export async function loadVentureWorkspace(id: string): Promise<LoadResult<Ventu
     return metricId ? [metricId] : [];
   });
   const snapshots = metricIds.length
-    ? await supabase.from("venture_metric_snapshots").select("metric_id, value_numeric, captured_on, created_at").in("metric_id", metricIds)
+    ? await supabase.from("venture_metric_snapshots").select("id, metric_id, value_numeric, captured_on, created_at").in("metric_id", metricIds)
     : { data: [], error: null };
   if (snapshots.error) return { status: "error" };
 
@@ -157,14 +157,16 @@ export async function loadVentureWorkspace(id: string): Promise<LoadResult<Ventu
     }
   }
 
-  const latest = new Map<string, { value: number; capturedOn: string | null; at: string }>();
+  const history = new Map<string, { id: string; value: number; capturedOn: string | null; at: string }[]>();
   for (const item of records(snapshots.data)) {
     const metricId = text(item.metric_id);
+    const snapshotId = text(item.id);
     const value = amount(item.value_numeric);
-    if (!metricId || value == null) continue;
-    const at = text(item.created_at) ?? "";
-    const current = latest.get(metricId);
-    if (!current || at > current.at) latest.set(metricId, { value, capturedOn: text(item.captured_on), at });
+    if (!metricId || !snapshotId || value == null) continue;
+    const row = { id: snapshotId, value, capturedOn: text(item.captured_on), at: text(item.created_at) ?? "" };
+    const list = history.get(metricId) ?? [];
+    list.push(row);
+    history.set(metricId, list);
   }
 
   return {
@@ -204,9 +206,20 @@ export async function loadVentureWorkspace(id: string): Promise<LoadResult<Ventu
       kpis: metricRows.flatMap((item) => {
         const metricId = text(item.id);
         const label = text(item.label);
-        const snapshot = metricId ? latest.get(metricId) : undefined;
+        const readings = metricId ? (history.get(metricId) ?? []).sort((left, right) => right.at.localeCompare(left.at)) : [];
+        const snapshot = readings[0];
         if (!metricId || !label || !snapshot) return [];
-        return [{ id: metricId, label, value: String(snapshot.value), capturedOn: snapshot.capturedOn }];
+        return [{
+          id: metricId,
+          label,
+          value: String(snapshot.value),
+          capturedOn: snapshot.capturedOn,
+          earlier: readings.slice(1, 8).map((reading) => ({
+            id: reading.id,
+            value: String(reading.value),
+            capturedOn: reading.capturedOn,
+          })),
+        }];
       }),
       documents: records(documents.data).flatMap((item) => {
         const documentId = text(item.id);

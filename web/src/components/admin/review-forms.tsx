@@ -1,4 +1,5 @@
 import {
+  completeExperimentAction,
   recordCommitteeAction,
   saveAssessmentAction,
   saveExperimentAction,
@@ -181,6 +182,51 @@ export function ExperimentForm({ applicationId }: { applicationId: string }) {
       </div>
       <div className="mt-4">
         <Button type="submit">Save experiment</Button>
+      </div>
+    </form>
+  );
+}
+
+export function CompleteExperimentForm({ applicationId, experimentId }: { applicationId: string; experimentId: string }) {
+  return (
+    <form action={completeExperimentAction} className="mt-6 border-t border-line pt-6">
+      <h3 className="text-sm text-cream">Record an outcome</h3>
+      <p className="mt-2 text-sm text-mute">
+        This closes the experiment. It does not change the application stage and does not send a message. The conclusion stays off the activity line.
+      </p>
+      <input type="hidden" name="applicationId" value={applicationId} />
+      <input type="hidden" name="experimentId" value={experimentId} />
+      <div className="mt-4 grid gap-4">
+        <label className="text-sm text-mute">
+          Outcome
+          <select name="outcome" required defaultValue="" className={controlClass}>
+            <option value="" disabled>
+              Choose an outcome
+            </option>
+            {EXPERIMENT_OUTCOMES.map((outcome) => (
+              <option key={outcome} value={outcome}>
+                {outcomeLabel(outcome)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="text-sm text-mute">
+          Conclusion
+          <textarea name="conclusion" rows={3} maxLength={4000} className={`${controlClass} py-3`} />
+        </label>
+        <label className="text-sm text-mute">
+          Results
+          <textarea name="results" rows={3} maxLength={4000} className={`${controlClass} py-3`} />
+        </label>
+        <label className="text-sm text-mute">
+          Evidence
+          <textarea name="evidence" rows={3} maxLength={4000} className={`${controlClass} py-3`} />
+        </label>
+      </div>
+      <div className="mt-4">
+        <Button type="submit" variant="line">
+          Record outcome
+        </Button>
       </div>
     </form>
   );

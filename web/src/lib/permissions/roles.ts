@@ -31,6 +31,15 @@ export function isAdminRole(role: string | null | undefined): boolean {
   return role === "ADMIN" || role === "SUPER_ADMIN";
 }
 
+export function assignableRoles(actorRole: string | null | undefined, targetRole: string | null, samePerson: boolean): Role[] {
+  if (samePerson) return [];
+  if (actorRole === "SUPER_ADMIN") return [...ROLES];
+  if (actorRole === "ADMIN" && targetRole !== "ADMIN" && targetRole !== "SUPER_ADMIN") {
+    return ["FOUNDER", "ANALYST", "PRODUCT", "ENGINEER", "INVESTMENT_COMMITTEE"];
+  }
+  return [];
+}
+
 export function canAccessOwnedRecord(
   actorId: string,
   ownerId: string,

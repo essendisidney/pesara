@@ -10,6 +10,13 @@ export const INQUIRY_TYPES = [
 
 export type InquiryType = (typeof INQUIRY_TYPES)[number];
 
+export type InquiryStatus = "open" | "handled";
+
+export function inquiryStatus(value: string | null): InquiryStatus | null {
+  if (value === "open" || value === "handled") return value;
+  return null;
+}
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function inquiryDraft(input: {

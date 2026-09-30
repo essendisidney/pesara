@@ -1,5 +1,6 @@
 import type { ApplicationDraft } from "@/lib/application";
 import { stageLabel } from "@/lib/admin/pipeline";
+import { documentKindLabel } from "@/lib/documents";
 
 export type Line = { label: string; value: string };
 
@@ -185,6 +186,10 @@ export function activitySummary(
       return metadata.reference ? `Application submitted as ${metadata.reference}` : "Application submitted";
     case "APPLICATION_WITHDRAWN":
       return "Application withdrawn";
+    case "TEAM_MEMBER_ADDED":
+      return "Team member added";
+    case "TEAM_MEMBER_REMOVED":
+      return "Team member removed";
     case "ANALYST_ASSIGNED":
       return `Analyst set to ${person(metadata.to_analyst ?? null, names)} from ${person(metadata.from_analyst ?? null, names)}`;
     case "STAGE_CHANGED":
@@ -207,8 +212,20 @@ export function activitySummary(
       return `Committee recorded ${decisionLabel(metadata.decision ?? "")}`;
     case "VENTURE_CREATED":
       return "Venture created";
+    case "VENTURE_PUBLISHED":
+      return "Venture shown on the public portfolio";
+    case "VENTURE_UNPUBLISHED":
+      return "Venture removed from the public portfolio";
+    case "MILESTONE_COMPLETED":
+      return "Milestone completed";
+    case "VENTURE_DOCUMENT":
+      return "Venture document stored";
+    case "KPI_SNAPSHOT":
+      return "KPI reading recorded";
     case "DOCUMENT_UPLOADED":
       return "Document uploaded";
+    case "DOCUMENT_REQUESTED":
+      return metadata.kind ? `${documentKindLabel(metadata.kind)} requested` : "Document requested";
     case "MESSAGE_SENT":
       return "Message sent";
     case "FOUNDER_NOTE":
@@ -221,6 +238,10 @@ export function activitySummary(
       return metadata.kind === "deletion" ? "Deletion requested" : metadata.kind === "export" ? "Export requested" : "Account request recorded";
     case "ACCOUNT_REQUEST_RECORDED":
       return "Account request marked recorded";
+    case "INQUIRY_HANDLED":
+      return "Inquiry marked handled";
+    case "ROLE_ASSIGNED":
+      return metadata.role ? `Role set to ${roleLabel(metadata.role)}` : "Role updated";
     case "CONSENT_RECORDED":
       return metadata.choice === "granted"
         ? "Marketing consent granted"

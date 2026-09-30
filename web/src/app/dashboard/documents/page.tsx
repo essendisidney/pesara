@@ -3,8 +3,9 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { DOCUMENT_KINDS, documentKindLabel } from "@/lib/documents";
 import { uploadDocumentAction } from "@/lib/founder/files";
-import { loadFounderDocuments } from "@/lib/founder/inbox";
+import { loadFounderDocumentRequests, loadFounderDocuments } from "@/lib/founder/inbox";
 import { listFounderApplications } from "@/lib/applications/actions";
+import { formatNairobi } from "@/lib/admin/present";
 import { requireFounder } from "@/lib/auth/session";
 
 const notices: Record<string, string> = { document: "Document stored." };
@@ -19,9 +20,10 @@ export default async function DocumentsPage({
   const query = await searchParams;
   const noticeKey = typeof query.notice === "string" ? query.notice : "";
   const errorKey = typeof query.error === "string" ? query.error : "";
-  const [documents, applications] = await Promise.all([
+  const [documents, applications, requests] = await Promise.all([
     loadFounderDocuments(auth.userId),
     listFounderApplications(),
+    loadFounderDocumentRequests(),
   ]);
 
   return (
@@ -33,6 +35,24 @@ export default async function DocumentsPage({
       </p>
       {notices[noticeKey] ? <p className="mt-4 text-sm text-cream">{notices[noticeKey]}</p> : null}
       {errors[errorKey] ? <p className="mt-4 text-sm text-gold">{errors[errorKey]}</p> : null}
+      <section className="mt-8 max-w-xl">
+        <h2 className="text-lg font-semibold">Asked for</h2>
+        <p className="mt-2 text-sm text-mute">Pesara can ask for a file here. That ask does not arrive by email.</p>
+        {requests === null ? <p className="mt-4 text-sm text-mute">Document requests could not be read.</p> : null}
+        {requests && requests.length === 0 ? <p className="mt-4 text-sm text-mute">No document has been requested.</p> : null}
+        {requests && requests.length > 0 ? (
+          <ul className="mt-4 divide-y divide-line border border-line">
+            {requests.map((request) => (
+              <li key={request.id} className="px-5 py-4">
+                <p className="text-sm text-cream">{request.kind}</p>
+                <p className="mt-1 text-xs text-mute">{request.application}</p>
+                {request.note ? <p className="mt-2 text-sm whitespace-pre-wrap text-cream">{request.note}</p> : null}
+                <p className="mt-2 text-xs text-mute">{formatNairobi(request.at)}</p>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
       {documents === null ? (
         <div className="mt-8">
           <EmptyState title="Documents could not be read">Try this page again in a moment.</EmptyState>

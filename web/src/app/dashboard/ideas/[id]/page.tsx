@@ -1,18 +1,28 @@
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getFounderApplication } from "@/lib/applications/actions";
-import { FOUNDER_TRACK, nextFounderAction, trackIndex } from "@/lib/applications/stages";
+import { withdrawApplicationAction } from "@/lib/applications/withdraw-action";
+import { loadOwnTeam } from "@/lib/founder/team";
+import { addTeamMemberAction, removeTeamMemberAction } from "@/lib/team-actions";
+import { Input } from "@/components/ui/input";
+import { canWithdraw, FOUNDER_TRACK, nextFounderAction, trackIndex } from "@/lib/applications/stages";
 import { requireFounder } from "@/lib/auth/session";
 import { loadFounderDecision } from "@/lib/founder/load";
 import { formatReviewDate } from "@/lib/founder/outcome";
+import { loadFounderVenture } from "@/lib/founder/venture-data";
+import { loadFounderDocumentRequests } from "@/lib/founder/inbox";
+import { formatNairobi } from "@/lib/admin/present";
 
 export default async function DashboardIdeaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireFounder();
   const { id } = await params;
+  const query = await searchParams;
   const application = await getFounderApplication(id);
   if (!application) {
     return (
@@ -29,6 +39,9 @@ export default async function DashboardIdeaPage({
 
   const current = trackIndex(application.stage);
   const decision = await loadFounderDecision(application.id);
+  const team = await loadOwnTeam(application.id);
+  const venture = await loadFounderVenture(application.id);
+  const requests = await loadFounderDocumentRequests(application.id);
 
   return (
     <>
@@ -62,6 +75,126 @@ export default async function DashboardIdeaPage({
         <div className="mt-8">
           <Button href="/submit">Continue application</Button>
         </div>
+      ) : null}
+      <section className="mt-10 max-w-xl">
+        <h2 className="text-lg font-semibold">Team</h2>
+        <p className="mt-2 text-sm text-mute">Name the people on this idea. Pesara staff can read the list.</p>
+        {query.notice === "team" ? <p className="mt-4 text-sm text-cream">Team member added.</p> : null}
+        {query.notice === "team-removed" ? <p className="mt-4 text-sm text-cream">Team member removed.</p> : null}
+        {query.error === "team" ? <p className="mt-4 text-sm text-gold">A team member needs a name.</p> : null}
+        {query.error === "team-failed" ? <p className="mt-4 text-sm text-gold">The team list could not be updated.</p> : null}
+        {team === null ? <p className="mt-4 text-sm text-mute">The team list could not be read.</p> : null}
+        {team && team.length === 0 ? <p className="mt-4 text-sm text-mute">No one named yet.</p> : null}
+        {team && team.length > 0 ? (
+          <ul className="mt-4 divide-y divide-line border border-line">
+            {team.map((member) => (
+              <li key={member.id} className="flex items-center justify-between gap-4 px-5 py-4">
+                <p className="text-sm text-cream">
+                  {member.name}
+                  {member.role ? <span className="mt-1 block text-xs text-mute">{member.role}</span> : null}
+                </p>
+                <form action={removeTeamMemberAction}>
+                  <input type="hidden" name="applicationId" value={application.id} />
+                  <input type="hidden" name="memberId" value={member.id} />
+                  <Button type="submit" variant="line" className="h-10 px-4">
+                    Remove
+                  </Button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {team ? (
+          <form action={addTeamMemberAction} className="mt-4 grid gap-4">
+            <input type="hidden" name="applicationId" value={application.id} />
+            <label className="text-sm">
+              Name
+              <Input name="name" required maxLength={120} autoComplete="name" />
+            </label>
+            <label className="text-sm">
+              Role
+              <Input name="role" maxLength={80} />
+            </label>
+            <Button type="submit" variant="line">
+              Add team member
+            </Button>
+          </form>
+        ) : null}
+      </section>
+      {canWithdraw(application.stage) ? (
+        <section className="mt-10 max-w-xl">
+          <h2 className="text-lg font-semibold">Withdraw</h2>
+          <p className="mt-2 text-sm text-mute">
+            You can withdraw while this idea is a draft, just submitted, or in screening. Pesara keeps the record.
+          </p>
+          {query.notice === "withdrawn" ? <p className="mt-4 text-sm text-cream">This application is withdrawn.</p> : null}
+          {query.error === "withdraw" ? (
+            <p className="mt-4 text-sm text-gold">Tick the box to withdraw this application.</p>
+          ) : null}
+          {query.error === "withdraw-failed" ? (
+            <p className="mt-4 text-sm text-gold">This application could not be withdrawn.</p>
+          ) : null}
+          <form action={withdrawApplicationAction} className="mt-4">
+            <input type="hidden" name="applicationId" value={application.id} />
+            <label className="flex min-h-12 items-start gap-3 py-1 text-sm">
+              <input type="checkbox" name="confirm" className="mt-1 h-5 w-5" />
+              <span>I want to withdraw this application.</span>
+            </label>
+            <Button type="submit" variant="line" className="mt-4">
+              Withdraw
+            </Button>
+          </form>
+        </section>
+      ) : null}
+      {requests === null ? <p className="mt-10 text-sm text-mute">Document requests could not be read.</p> : null}
+      {requests && requests.length > 0 ? (
+        <section className="mt-10 max-w-xl">
+          <h2 className="text-lg font-semibold">Asked for</h2>
+          <p className="mt-2 text-sm text-mute">Pesara asked for these files. The notice stays in the app.</p>
+          <ul className="mt-4 divide-y divide-line border border-line">
+            {requests.map((request) => (
+              <li key={request.id} className="px-5 py-4">
+                <p className="text-sm text-cream">{request.kind}</p>
+                {request.note ? <p className="mt-2 text-sm whitespace-pre-wrap text-cream">{request.note}</p> : null}
+                <p className="mt-2 text-xs text-mute">{formatNairobi(request.at)}</p>
+              </li>
+            ))}
+          </ul>
+          <Button href="/dashboard/documents" variant="line" className="mt-4">
+            Open documents
+          </Button>
+        </section>
+      ) : null}
+      {venture === "error" ? (
+        <p className="mt-10 text-sm text-mute">The venture record could not be read.</p>
+      ) : null}
+      {venture && venture !== "error" ? (
+        <section className="mt-10 max-w-2xl border border-line px-5 py-6">
+          <p className="text-xs tracking-[0.18em] text-gold uppercase">Venture</p>
+          <h2 className="mt-3 text-2xl font-semibold">{venture.name}</h2>
+          <p className="mt-2 text-sm text-mute">Commercial terms stay inside Pesara.</p>
+          {venture.relationship ? <p className="mt-4 text-sm text-cream">{venture.relationship}</p> : null}
+          <p className="mt-2 text-sm text-mute">{[venture.status, venture.stage].filter(Boolean).join(" · ")}</p>
+          {venture.description ? <p className="mt-4 text-sm whitespace-pre-wrap text-cream">{venture.description}</p> : null}
+          {venture.website ? (
+            <a href={venture.website} className="mt-4 inline-flex min-h-11 items-center text-sm text-gold">
+              {venture.website}
+            </a>
+          ) : null}
+          {venture.milestones.length > 0 ? (
+            <ul className="mt-6 divide-y divide-line border border-line">
+              {venture.milestones.map((milestone, index) => (
+                <li key={`${milestone.title}-${index}`} className="px-5 py-4 text-sm">
+                  <span className="text-cream">{milestone.title}</span>
+                  <span className="mt-1 block text-xs text-mute">
+                    {milestone.dueOn ? `Due ${formatReviewDate(milestone.dueOn)}` : "No due date"}
+                    {milestone.completedAt ? ` · Completed ${formatNairobi(milestone.completedAt)}` : " · Open"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
       ) : null}
       {decision ? (
         <section className="mt-10 max-w-2xl border border-line px-5 py-6">

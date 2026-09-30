@@ -65,6 +65,10 @@ export function safeFileName(name: string): string | null {
   return base;
 }
 
+export function ventureDocumentPath(ventureId: string, fileName: string, token: string): string | null {
+  return applicationDocumentPath(ventureId, fileName, token);
+}
+
 export function applicationDocumentPath(applicationId: string, fileName: string, token: string): string | null {
   if (!UUID.test(applicationId) || !UUID.test(token)) return null;
   const safe = safeFileName(fileName);

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { articleSlug, isArticleCategory } from "@/lib/admin/office";
 import { isUuid } from "@/lib/admin/pipeline";
+import { ROLES } from "@/lib/permissions/roles";
 import { getAuthContext } from "@/lib/auth/session";
 import { isStaffRole } from "@/lib/permissions/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -53,6 +54,30 @@ export async function addFounderMeetingAction(formData: FormData) {
   if (error) redirect(`${back}?error=failed`);
   revalidatePath(back);
   redirect(`${back}?notice=meeting`);
+}
+
+export async function markInquiryHandledAction(formData: FormData) {
+  const inquiryId = field(formData, "inquiryId");
+  if (!isUuid(inquiryId)) redirect("/admin/inquiries?error=invalid");
+  const supabase = await staff();
+  const { error } = await supabase.rpc("mark_inquiry_handled", { p_id: inquiryId });
+  if (error) redirect("/admin/inquiries?error=failed");
+  revalidatePath("/admin/inquiries");
+  revalidatePath("/admin");
+  redirect("/admin/inquiries?notice=handled");
+}
+
+export async function setStaffRoleAction(formData: FormData) {
+  const founderId = field(formData, "founderId");
+  const role = field(formData, "role");
+  const back = isUuid(founderId) ? `/admin/founders/${founderId}` : "/admin/founders";
+  if (!isUuid(founderId) || !(ROLES as readonly string[]).includes(role)) redirect(`${back}?error=invalid`);
+  const supabase = await staff();
+  const { error } = await supabase.rpc("set_staff_role", { p_user: founderId, p_role: role });
+  if (error) redirect(`${back}?error=failed`);
+  revalidatePath(back);
+  revalidatePath("/admin/founders");
+  redirect(`${back}?notice=role`);
 }
 
 export async function saveArticleAction(formData: FormData) {

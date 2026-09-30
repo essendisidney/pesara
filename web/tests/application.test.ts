@@ -8,7 +8,7 @@ import {
   mergeDraft,
   STEP_TITLES,
 } from "../src/lib/application";
-import { FOUNDER_TRACK, nextFounderAction, trackIndex } from "../src/lib/applications/stages";
+import { canWithdraw, FOUNDER_TRACK, nextFounderAction, trackIndex } from "../src/lib/applications/stages";
 import { canAccessOwnedRecord } from "../src/lib/permissions/roles";
 
 describe("application references", () => {
@@ -57,6 +57,9 @@ describe("founder facing track", () => {
     expect(trackIndex("draft")).toBe(-1);
     expect(nextFounderAction("submitted")).toContain("opportunity screen");
     expect(FOUNDER_TRACK[0].label).toBe("Submitted");
+    expect(canWithdraw("screening")).toBe(true);
+    expect(canWithdraw("interview")).toBe(false);
+    expect(canWithdraw("live")).toBe(false);
   });
 });
 

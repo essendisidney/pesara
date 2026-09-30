@@ -61,7 +61,7 @@ describe("sprint 3 activity", () => {
     expect(activitySummary("VALIDATION_STARTED", { from_stage: "screening", note: "secret" }, new Map())).toBe(
       "Validation started",
     );
-    expect(activitySummary("EXPERIMENT_COMPLETED", { experiment_id: "secret", conclusion: "secret" }, new Map())).toBe(
+    expect(activitySummary("EXPERIMENT_COMPLETED", { experiment_id: "secret", conclusion: "secret", outcome: "VALIDATED" }, new Map())).toBe(
       "Validation experiment completed",
     );
   });

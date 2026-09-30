@@ -1,3 +1,5 @@
+import { safeHttp } from "@/lib/admin/present";
+
 export const VENTURE_STATUSES = ["VALIDATING", "BUILDING", "LIVE", "SCALING", "EXITED", "PAUSED"] as const;
 
 export type VentureStatus = (typeof VENTURE_STATUSES)[number];
@@ -86,6 +88,49 @@ export function isCommercialKind(value: string): value is CommercialKind {
   return (COMMERCIAL_KINDS as readonly string[]).includes(value);
 }
 
+const NAMED_RELATIONSHIPS = ["built_by_pesara", "pesara_company", "technology_by_pesara"] as const;
+
+const RESERVED_PORTFOLIO = ["marit", "jameiyah", "little scientist", "mukuna & co. advocates", "athi gardens"];
+
+export type PortfolioCard = {
+  name: string;
+  place: string;
+  relationship: string;
+  body: string;
+  domain: string;
+  href: string;
+};
+
+function textValue(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+export function publishedPortfolioCards(rows: readonly Record<string, unknown>[]): PortfolioCard[] {
+  const reserved = new Set(RESERVED_PORTFOLIO);
+  const cards: PortfolioCard[] = [];
+  for (const row of rows) {
+    const name = textValue(row.name);
+    const body = textValue(row.description);
+    const relationship = textValue(row.pesara_relationship);
+    const href = safeHttp(textValue(row.website));
+    if (!name || name.length > 200 || !body || body.length > 600 || !href) continue;
+    if (!relationship || !(NAMED_RELATIONSHIPS as readonly string[]).includes(relationship)) continue;
+    if (reserved.has(name.toLowerCase())) continue;
+    const place = textValue(row.country) ?? textValue(row.industry) ?? "";
+    cards.push({
+      name,
+      place,
+      relationship: relationshipLabel(relationship),
+      body,
+      domain: href.replace(/^https?:\/\//, "").replace(/\/$/, ""),
+      href,
+    });
+  }
+  return cards;
+}
+
 export function publicVentureCard(venture: {
   name: string;
   website: string | null;
@@ -101,6 +146,11 @@ export function publicVentureCard(venture: {
 export const VENTURE_NOTICES: Record<string, string> = {
   saved: "Venture workspace saved.",
   milestone: "Milestone added.",
+  completed: "Milestone marked complete.",
   kpi: "KPI recorded.",
+  snapshot: "KPI reading recorded.",
   note: "Internal note saved.",
+  document: "Document stored.",
+  published: "This venture is on the public portfolio.",
+  unpublished: "This venture is off the public portfolio.",
 };

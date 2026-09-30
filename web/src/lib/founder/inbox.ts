@@ -3,6 +3,44 @@ import { isUuid } from "@/lib/admin/pipeline";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/validation/env";
 
+export type DocumentRequest = {
+  id: string;
+  kind: string;
+  note: string | null;
+  at: string;
+  application: string;
+};
+
+export async function loadFounderDocumentRequests(applicationId?: string): Promise<DocumentRequest[] | null> {
+  if (!supabaseConfigured()) return null;
+  if (applicationId !== undefined && !isUuid(applicationId)) return null;
+  const supabase = await createClient();
+  let query = supabase
+    .from("document_requests")
+    .select("id, kind, note, created_at, application_id, idea_applications(reference, payload)")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (applicationId) query = query.eq("application_id", applicationId);
+  const { data, error } = await query;
+  if (error) return null;
+  return (data ?? []).flatMap((row) => {
+    const id = typeof row.id === "string" ? row.id : "";
+    const kind = typeof row.kind === "string" ? row.kind : "";
+    if (!id || !kind) return [];
+    const joined = row.idea_applications as { reference?: string | null; payload?: { ideaName?: string } } | { reference?: string | null; payload?: { ideaName?: string } }[] | null;
+    const application = Array.isArray(joined) ? joined[0] : joined;
+    return [
+      {
+        id,
+        kind: documentKindLabel(kind),
+        note: typeof row.note === "string" && row.note.trim() ? row.note.trim() : null,
+        at: typeof row.created_at === "string" ? row.created_at : "",
+        application: application?.payload?.ideaName || application?.reference || "Idea",
+      },
+    ];
+  });
+}
+
 export type FounderDocument = {
   id: string;
   name: string;

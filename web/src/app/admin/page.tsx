@@ -3,12 +3,17 @@ import { EmptyState, MetricCard } from "@/components/ui/empty-state";
 import { formatNairobi } from "@/lib/admin/present";
 import { COMMAND_METRICS } from "@/lib/admin/pipeline";
 import { loadCommandCentre, loadReadingQueue } from "@/lib/admin/queries";
-import { loadOpenAccountRequests } from "@/lib/admin/office-data";
+import { loadOpenAccountRequests, loadOpenInquiryCount } from "@/lib/admin/office-data";
 import { accountRequestLabel } from "@/lib/account-requests";
 import { recordAccountRequestAction } from "@/lib/account-actions";
 
 export default async function AdminPage() {
-  const [centre, queue, requests] = await Promise.all([loadCommandCentre(), loadReadingQueue(), loadOpenAccountRequests()]);
+  const [centre, queue, requests, inquiries] = await Promise.all([
+    loadCommandCentre(),
+    loadReadingQueue(),
+    loadOpenAccountRequests(),
+    loadOpenInquiryCount(),
+  ]);
 
   return (
     <>
@@ -66,6 +71,7 @@ export default async function AdminPage() {
         </>
       ) : null}
       {centre.status !== "offline" ? <ReadingQueue queue={queue} /> : null}
+      {centre.status !== "offline" ? <OpenInquiries inquiries={inquiries} /> : null}
       {centre.status !== "offline" ? <AccountRequests requests={requests} /> : null}
     </>
   );
@@ -103,6 +109,23 @@ function ReadingQueue({ queue }: { queue: Awaited<ReturnType<typeof loadReadingQ
             ))}
           </ol>
         </>
+      ) : null}
+    </section>
+  );
+}
+
+function OpenInquiries({ inquiries }: { inquiries: Awaited<ReturnType<typeof loadOpenInquiryCount>> }) {
+  return (
+    <section className="mt-12 max-w-3xl">
+      <h2 className="text-lg font-semibold">Open inquiries</h2>
+      <p className="mt-2 text-sm text-mute">Contact messages waiting to be marked handled. They are not applications.</p>
+      {inquiries.status === "error" ? <p className="mt-4 text-sm text-mute">Open inquiries could not be loaded.</p> : null}
+      {inquiries.status === "ready" ? (
+        <p className="mt-4 text-sm text-mute">
+          <Link href="/admin/inquiries" className="text-gold">
+            {inquiries.open === 1 ? "1 open message" : `${inquiries.open} open messages`}
+          </Link>
+        </p>
       ) : null}
     </section>
   );

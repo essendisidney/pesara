@@ -14,6 +14,7 @@ import { getAuthContext } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/validation/env";
 import { isCommercialKind, isPublicRelationship, isVentureStatus } from "@/lib/admin/venture";
+import { DOCUMENT_BYTE_LIMIT, isDocumentKind, isDocumentMime, ventureDocumentPath } from "@/lib/documents";
 
 async function staffClient() {
   if (!supabaseConfigured()) redirect("/login?next=/admin");
@@ -58,6 +59,28 @@ function field(formData: FormData, name: string): string {
 function optionalDate(value: string): string | null {
   if (!value) return null;
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
+}
+
+export async function requestDocumentAction(formData: FormData) {
+  const id = applicationId(formData);
+  if (!id) redirect("/admin/applications?error=invalid");
+  const kind = field(formData, "kind");
+  const note = field(formData, "note");
+  if (!isDocumentKind(kind) || note.length > 160) {
+    redirect(`/admin/applications/${id}?tab=documents&error=invalid`);
+  }
+
+  const supabase = await staffClient();
+  const { error } = await supabase.rpc("request_application_document", {
+    p_application: id,
+    p_kind: kind,
+    p_note: note,
+  });
+  if (error) redirect(`/admin/applications/${id}?tab=documents&error=${failureCode(error.message)}`);
+  revalidatePath("/dashboard/documents");
+  revalidatePath("/dashboard/notices");
+  revalidatePath(`/dashboard/ideas/${id}`);
+  finish(id, "document-request", "documents");
 }
 
 export async function assignAnalystAction(formData: FormData) {
@@ -170,6 +193,30 @@ export async function saveExperimentAction(formData: FormData) {
   });
   if (error) redirect(`/admin/applications/${id}?tab=validation&error=${failureCode(error.message)}`);
   finish(id, "experiment", "validation");
+}
+
+export async function completeExperimentAction(formData: FormData) {
+  const id = applicationId(formData);
+  if (!id) redirect("/admin/applications?error=invalid");
+  const experiment = field(formData, "experimentId");
+  const outcome = field(formData, "outcome");
+  const conclusion = field(formData, "conclusion");
+  const results = field(formData, "results");
+  const evidence = field(formData, "evidence");
+  if (!isUuid(experiment) || !isExperimentOutcome(outcome) || [conclusion, results, evidence].some((value) => value.length > 4000)) {
+    redirect(`/admin/applications/${id}?tab=validation&error=invalid`);
+  }
+
+  const supabase = await staffClient();
+  const { error } = await supabase.rpc("complete_validation_experiment", {
+    p_experiment: experiment,
+    p_outcome: outcome,
+    p_conclusion: conclusion,
+    p_results: results,
+    p_evidence: evidence,
+  });
+  if (error) redirect(`/admin/applications/${id}?tab=validation&error=${failureCode(error.message)}`);
+  finish(id, "experiment-closed", "validation");
 }
 
 export async function recordCommitteeAction(formData: FormData) {
@@ -332,7 +379,24 @@ export async function updateVentureAction(formData: FormData) {
   if (error) redirect(`/admin/ventures/${id}?error=${failureCode(error.message)}`);
   revalidatePath("/admin/ventures");
   revalidatePath(`/admin/ventures/${id}`);
+  revalidatePath("/portfolio");
   redirect(`/admin/ventures/${id}?notice=saved`);
+}
+
+export async function setVenturePublicationAction(formData: FormData) {
+  const id = ventureId(formData);
+  if (!id) redirect("/admin/ventures?error=invalid");
+  const auth = await getAuthContext();
+  if (!auth || !isAdminRole(auth.role)) redirect(`/admin/ventures/${id}?error=invalid`);
+  const published = field(formData, "published");
+  if (published !== "true" && published !== "false") redirect(`/admin/ventures/${id}?error=invalid`);
+  const supabase = await staffClient();
+  const { error } = await supabase.rpc("set_venture_publication", { p_id: id, p_public: published === "true" });
+  if (error) redirect(`/admin/ventures/${id}?error=${failureCode(error.message)}`);
+  revalidatePath("/admin/ventures");
+  revalidatePath(`/admin/ventures/${id}`);
+  revalidatePath("/portfolio");
+  redirect(`/admin/ventures/${id}?notice=${published === "true" ? "published" : "unpublished"}`);
 }
 
 export async function addVentureMilestoneAction(formData: FormData) {
@@ -349,6 +413,19 @@ export async function addVentureMilestoneAction(formData: FormData) {
   redirect(`/admin/ventures/${id}?notice=milestone`);
 }
 
+export async function completeVentureMilestoneAction(formData: FormData) {
+  const id = ventureId(formData);
+  if (!id) redirect("/admin/ventures?error=invalid");
+  const milestoneId = field(formData, "milestoneId");
+  if (!isUuid(milestoneId)) redirect(`/admin/ventures/${id}?error=invalid`);
+  const supabase = await staffClient();
+  const { error } = await supabase.rpc("complete_venture_milestone", { p_milestone: milestoneId });
+  if (error) redirect(`/admin/ventures/${id}?error=${failureCode(error.message)}`);
+  revalidatePath(`/admin/ventures/${id}`);
+  revalidatePath(`/admin/applications`);
+  redirect(`/admin/ventures/${id}?notice=completed`);
+}
+
 export async function addVentureKpiAction(formData: FormData) {
   const id = ventureId(formData);
   if (!id) redirect("/admin/ventures?error=invalid");
@@ -363,6 +440,20 @@ export async function addVentureKpiAction(formData: FormData) {
   redirect(`/admin/ventures/${id}?notice=kpi`);
 }
 
+export async function recordVentureSnapshotAction(formData: FormData) {
+  const id = ventureId(formData);
+  if (!id) redirect("/admin/ventures?error=invalid");
+  const metricId = field(formData, "metricId");
+  const raw = field(formData, "value");
+  const value = Number(raw);
+  if (!isUuid(metricId) || !raw || !Number.isFinite(value)) redirect(`/admin/ventures/${id}?error=invalid`);
+  const supabase = await staffClient();
+  const { error } = await supabase.rpc("record_venture_snapshot", { p_metric: metricId, p_value: value });
+  if (error) redirect(`/admin/ventures/${id}?error=${failureCode(error.message)}`);
+  revalidatePath(`/admin/ventures/${id}`);
+  redirect(`/admin/ventures/${id}?notice=snapshot`);
+}
+
 export async function addVentureNoteAction(formData: FormData) {
   const id = ventureId(formData);
   if (!id) redirect("/admin/ventures?error=invalid");
@@ -373,4 +464,35 @@ export async function addVentureNoteAction(formData: FormData) {
   if (error) redirect(`/admin/ventures/${id}?error=${failureCode(error.message)}`);
   revalidatePath(`/admin/ventures/${id}`);
   redirect(`/admin/ventures/${id}?notice=note`);
+}
+
+export async function uploadVentureDocumentAction(formData: FormData) {
+  const id = ventureId(formData);
+  if (!id) redirect("/admin/ventures?error=invalid");
+  const title = field(formData, "title");
+  const file = formData.get("file");
+  if (!title || !bounded(title, 160)) redirect(`/admin/ventures/${id}?error=invalid`);
+  if (!(file instanceof File) || file.size < 1 || file.size > DOCUMENT_BYTE_LIMIT || !isDocumentMime(file.type)) {
+    redirect(`/admin/ventures/${id}?error=invalid`);
+  }
+  const path = ventureDocumentPath(id, file.name, crypto.randomUUID());
+  if (!path) redirect(`/admin/ventures/${id}?error=invalid`);
+  const supabase = await staffClient();
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const uploaded = await supabase.storage.from("venture-documents").upload(path, bytes, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (uploaded.error) redirect(`/admin/ventures/${id}?error=failed`);
+  const registered = await supabase.rpc("register_venture_document", {
+    p_venture: id,
+    p_path: path,
+    p_title: title,
+  });
+  if (registered.error) {
+    await supabase.storage.from("venture-documents").remove([path]);
+    redirect(`/admin/ventures/${id}?error=failed`);
+  }
+  revalidatePath(`/admin/ventures/${id}`);
+  redirect(`/admin/ventures/${id}?notice=document`);
 }

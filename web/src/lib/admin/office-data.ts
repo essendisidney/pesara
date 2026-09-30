@@ -1,4 +1,5 @@
 import { safeHttp } from "@/lib/admin/present";
+import { inquiryStatus } from "@/lib/inquiries";
 import { acquisitionSource, completedStageDays, groupedCounts, medianDays, orderedCounts, reachedStage, type StageEvent } from "@/lib/admin/office";
 import { FOUNDER_TRACK } from "@/lib/applications/stages";
 import { isUuid, STAFF_STAGES, stageLabel } from "@/lib/admin/pipeline";
@@ -27,6 +28,7 @@ export type FounderFile = {
   requests: { id: string; kind: string; status: string; at: string }[];
   marketing: boolean;
   consents: { id: string; granted: boolean; at: string }[];
+  role: string | null;
 };
 
 export type Timing = {
@@ -93,15 +95,18 @@ export async function loadFounder(id: string): Promise<{ status: OfficeStatus; f
   if (!isUuid(id)) return { status: "ready", founder: null };
   if (!supabaseConfigured()) return { status: "offline", founder: null };
   const supabase = await createClient();
-  const [profile, applications, meetings, notes, requests, consents] = await Promise.all([
+  const [profile, applications, meetings, notes, requests, consents, roleRow] = await Promise.all([
     supabase.from("profiles").select("id, full_name, country, city, phone, occupation, linkedin_url, marketing_opt_in").eq("id", id).maybeSingle(),
     supabase.from("idea_applications").select("id, reference, stage").eq("user_id", id).order("created_at", { ascending: false }),
     supabase.from("founder_meetings").select("id, held_on, summary, application_id").eq("founder_id", id).order("held_on", { ascending: false }),
     supabase.from("admin_notes").select("id, body, created_at").eq("entity", "founder").eq("entity_id", id).order("created_at", { ascending: false }),
     supabase.from("data_requests").select("id, kind, status, created_at").eq("user_id", id).order("created_at", { ascending: false }),
     supabase.from("consent_events").select("id, granted, created_at").eq("user_id", id).order("created_at", { ascending: false }).limit(20),
+    supabase.from("user_roles").select("role").eq("user_id", id).maybeSingle(),
   ]);
-  if (profile.error || applications.error || meetings.error || notes.error || requests.error || consents.error) return { status: "error", founder: null };
+  if (profile.error || applications.error || meetings.error || notes.error || requests.error || consents.error || roleRow.error) {
+    return { status: "error", founder: null };
+  }
   const row = profile.data as Record<string, unknown> | null;
   const founderId = text(row?.id);
   if (!founderId) return { status: "ready", founder: null };
@@ -150,6 +155,7 @@ export async function loadFounder(id: string): Promise<{ status: OfficeStatus; f
         if (!consentId || typeof item.granted !== "boolean") return [];
         return [{ id: consentId, granted: item.granted, at: text(item.created_at) ?? "" }];
       }),
+      role: text((roleRow.data as Record<string, unknown> | null)?.role),
     },
   };
 }
@@ -300,6 +306,7 @@ export type InquiryRow = {
   email: string;
   type: string;
   message: string;
+  status: "open" | "handled";
   at: string;
 };
 
@@ -327,7 +334,7 @@ export async function loadInquiries(): Promise<{ status: OfficeStatus; inquiries
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("inquiries")
-    .select("id, name, email, inquiry_type, message, created_at")
+    .select("id, name, email, inquiry_type, message, status, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) return { status: "error", inquiries: [] };
@@ -338,11 +345,20 @@ export async function loadInquiries(): Promise<{ status: OfficeStatus; inquiries
       const email = text(row.email);
       const type = text(row.inquiry_type);
       const message = text(row.message);
+      const status = inquiryStatus(text(row.status));
       const at = text(row.created_at);
-      if (!id || !email || !type || !message || !at) return [];
-      return [{ id, name: text(row.name) ?? "No name", email, type, message, at }];
+      if (!id || !email || !type || !message || !status || !at) return [];
+      return [{ id, name: text(row.name) ?? "No name", email, type, message, status, at }];
     }),
   };
+}
+
+export async function loadOpenInquiryCount(): Promise<{ status: OfficeStatus; open: number }> {
+  if (!supabaseConfigured()) return { status: "offline", open: 0 };
+  const supabase = await createClient();
+  const { count, error } = await supabase.from("inquiries").select("id", { count: "exact", head: true }).eq("status", "open");
+  if (error || count === null) return { status: "error", open: 0 };
+  return { status: "ready", open: count };
 }
 
 export type OpenAccountRequest = {

@@ -81,6 +81,7 @@ export type ExperimentView = {
   title: string;
   method: string | null;
   at: string;
+  open: boolean;
   lines: Line[];
   results: { id: string; summary: string | null; at: string; evidence: Line[] }[];
 };
@@ -115,11 +116,13 @@ export type ApplicationFile = {
   decisions: CommitteeView[];
   ventureId: string | null;
   documents: { id: string; name: string; mime: string | null; size: string; at: string; kind: string | null }[];
+  documentRequests: { id: string; kind: string; note: string | null; at: string }[];
   threads: { id: string; subject: string }[];
   messages: { id: string; sender: string; body: string; at: string; read: boolean; attachment: { id: string; name: string } | null }[];
   notes: { id: string; author: string; body: string; at: string }[];
   history: { id: string; from: string; to: string; actor: string; at: string }[];
   activity: { id: string; summary: string; actor: string; at: string }[];
+  team: { id: string; name: string; role: string }[];
   staff: StaffOption[];
 };
 
@@ -522,11 +525,16 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
   const applicationId = text(row.id);
   if (!applicationId) return { status: "missing" };
 
-  const [documents, messages, notes, history, activity, assessments, experiments, decisions, staff, threads] =
+  const [documents, documentRequests, messages, notes, history, activity, assessments, experiments, decisions, staff, threads, team] =
     await Promise.all([
       supabase
         .from("application_documents")
         .select("id, path, mime_type, byte_size, created_at, kind, title")
+        .eq("application_id", applicationId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("document_requests")
+        .select("id, kind, note, created_at")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: false }),
       supabase
@@ -572,10 +580,16 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
         .select("id, subject")
         .eq("application_id", applicationId)
         .order("created_at", { ascending: true }),
+      supabase
+        .from("application_team_members")
+        .select("id, full_name, role")
+        .eq("application_id", applicationId)
+        .order("created_at", { ascending: true }),
     ]);
 
   if (
     documents.error ||
+    documentRequests.error ||
     messages.error ||
     notes.error ||
     history.error ||
@@ -584,7 +598,8 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
     experiments.error ||
     decisions.error ||
     !staff ||
-    threads.error
+    threads.error ||
+    team.error
   ) {
     return { status: "error" };
   }
@@ -783,6 +798,7 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
             title,
             method: text(item.method),
             at: text(item.created_at) ?? "",
+            open: !outcome,
             lines,
             results: resultsByExperiment.get(itemId) ?? [],
           },
@@ -829,6 +845,12 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
             kind: text(item.kind),
           },
         ];
+      }),
+      documentRequests: records(documentRequests.data).flatMap((item) => {
+        const itemId = text(item.id);
+        const kind = text(item.kind);
+        if (!itemId || !kind) return [];
+        return [{ id: itemId, kind, note: text(item.note), at: text(item.created_at) ?? "" }];
       }),
       threads: records(threads.data).flatMap((item) => {
         const itemId = text(item.id);
@@ -890,6 +912,12 @@ export async function loadApplicationDetail(id: string): Promise<DetailResult> {
             at: text(item.created_at) ?? "",
           },
         ];
+      }),
+      team: records(team.data).flatMap((item) => {
+        const itemId = text(item.id);
+        const name = text(item.full_name);
+        if (!itemId || !name) return [];
+        return [{ id: itemId, name, role: text(item.role) ?? "" }];
       }),
       staff,
     },

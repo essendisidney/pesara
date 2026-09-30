@@ -18,6 +18,10 @@ export function trackIndex(stage: string): number {
   return index;
 }
 
+export function canWithdraw(stage: string): boolean {
+  return stage === "draft" || stage === "submitted" || stage === "screening";
+}
+
 export function nextFounderAction(stage: string): string {
   switch (stage) {
     case "draft":

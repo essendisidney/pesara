@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { addFounderMeetingAction, addFounderNoteAction } from "@/lib/admin/office-actions";
+import { addFounderMeetingAction, addFounderNoteAction, setStaffRoleAction } from "@/lib/admin/office-actions";
 import { recordAccountRequestAction } from "@/lib/account-actions";
 import { accountRequestLabel } from "@/lib/account-requests";
 import { loadFounder } from "@/lib/admin/office-data";
 import { knownMessage, PAGE_ERRORS } from "@/lib/admin/pipeline";
-import { formatNairobi } from "@/lib/admin/present";
+import { formatNairobi, roleLabel } from "@/lib/admin/present";
+import { getAuthContext } from "@/lib/auth/session";
+import { assignableRoles } from "@/lib/permissions/roles";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 
@@ -12,6 +14,7 @@ const notices: Record<string, string> = {
   note: "Internal note saved.",
   meeting: "Meeting recorded.",
   request: "Account request marked recorded.",
+  role: "Role updated.",
 };
 
 export default async function Page({
@@ -24,6 +27,7 @@ export default async function Page({
   const { id } = await params;
   const query = await searchParams;
   const result = await loadFounder(id);
+  const auth = await getAuthContext();
   const notice = knownMessage(notices, query.notice);
   const error = knownMessage(PAGE_ERRORS, query.error);
 
@@ -44,6 +48,7 @@ export default async function Page({
   }
 
   const founder = result.founder;
+  const roleOptions = assignableRoles(auth?.role, founder.role, auth?.userId === founder.id);
   return (
     <>
       <Link href="/admin/founders" className="text-sm text-gold">
@@ -58,6 +63,32 @@ export default async function Page({
       ) : null}
       {notice ? <p className="mt-4 text-sm text-cream">{notice}</p> : null}
       {error ? <p className="mt-4 text-sm text-gold">{error}</p> : null}
+
+      <section className="mt-10 max-w-xl">
+        <h2 className="text-lg font-semibold">Pesara role</h2>
+        <p className="mt-2 text-sm text-mute">
+          A staff role can read ideas across accounts. A person cannot change their own role. This does not send a message.
+        </p>
+        <p className="mt-3 text-sm text-cream">{founder.role ? roleLabel(founder.role) : "Not recorded"}</p>
+        {roleOptions.length > 0 ? (
+          <form action={setStaffRoleAction} className="mt-4 grid gap-4">
+            <input type="hidden" name="founderId" value={founder.id} />
+            <label className="text-sm text-cream">
+              Role
+              <select name="role" defaultValue={founder.role ?? "FOUNDER"} className="mt-2 min-h-12 w-full rounded-[2px] border border-line bg-ink-2/80 px-3">
+                {roleOptions.map((role) => (
+                  <option key={role} value={role}>
+                    {roleLabel(role)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button type="submit" variant="line">
+              Save role
+            </Button>
+          </form>
+        ) : null}
+      </section>
 
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Applications</h2>

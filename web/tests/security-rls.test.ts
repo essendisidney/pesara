@@ -103,6 +103,12 @@ describe("founder isolation", () => {
       expect(storage.body).toContain("app.user_id = auth.uid()");
       expect(storage.body).toContain("private.is_staff()");
     }
+    for (const id of ["storage.objects.venture_documents_read", "storage.objects.venture_documents_insert"]) {
+      const storage = policy(policies, id);
+      expect(storage.body).toContain("bucket_id = 'venture-documents'");
+      expect(storage.body).toContain("private.is_staff()");
+      expect(storage.body).toContain("storage.foldername(name)");
+    }
   });
 
   it("keeps assessments, experiments, and committee decisions on staff", () => {
@@ -118,6 +124,15 @@ describe("founder isolation", () => {
       expectStaffRead(policies, id);
     }
     expect(policies.has("public.viability_dimensions.dimensions_staff")).toBe(false);
+    const completed = lastFunction(sql, "private.log_experiment_completed");
+    expect(completed).toContain("old.outcome is null");
+    expect(completed).toContain("'experiment_id'");
+    expect(completed).not.toContain("conclusion");
+    expect(completed).not.toContain("email");
+    const close = lastFunction(sql, "public.complete_validation_experiment");
+    expect(close).toContain("outcome is null");
+    expect(close).not.toContain("activity_logs");
+    expect(close).not.toContain("email");
     const decision = lastFunction(sql, "public.founder_decision_view");
     expect(decision).toContain("a.user_id = auth.uid()");
     expect(decision).not.toContain("committee_notes");
@@ -179,6 +194,16 @@ describe("founder isolation", () => {
     expect(policy(policies, "public.consent_events.consent_events_owner").body.toLowerCase().startsWith("for select")).toBe(true);
     expectStaffRead(policies, "public.consent_events.consent_events_staff");
     expect(policies.has("public.consent_events.consent_self")).toBe(false);
+    expect(policy(policies, "public.application_team_members.team_owner").body.toLowerCase().startsWith("for select")).toBe(true);
+    expectStaffRead(policies, "public.application_team_members.team_staff");
+    expect(policy(policies, "public.document_requests.document_requests_owner").body).toContain("user_id = auth.uid()");
+    expectStaffRead(policies, "public.document_requests.document_requests_staff");
+    const request = lastFunction(sql, "public.request_application_document");
+    expect(request).toContain("Pesara asked for a document.");
+    expect(request.slice(request.indexOf("DOCUMENT_REQUESTED"))).not.toContain("p_note");
+    expect(request).not.toContain("email");
+    expect(policies.has("public.inquiries.inquiries_insert")).toBe(false);
+    expectStaffRead(policies, "public.inquiries.inquiries_staff");
   });
 });
 

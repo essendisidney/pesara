@@ -25,7 +25,7 @@ export default async function Page({
       <p className="text-xs tracking-[0.18em] text-gold uppercase">Notices</p>
       <h1 className="mt-3 text-3xl font-semibold tracking-tight">What changed</h1>
       <p className="mt-3 max-w-xl text-sm text-mute">
-        A notice appears when Pesara receives your idea, changes its stage, sends a message, records a decision, or opens a venture. It does not include the message or the decision text.
+        A notice appears when Pesara receives your idea, changes its stage, asks for a document, sends a message, records a decision, or opens a venture. It does not include the message, the document note, or the decision text.
       </p>
       {error ? <p className="mt-4 text-sm text-gold">{error}</p> : null}
       {notices === null ? (

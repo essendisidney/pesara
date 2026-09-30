@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
 import { Frame } from "@/components/marketing/frame";
 import { Button } from "@/components/ui/button";
+import { loadPublishedPortfolio } from "@/lib/portfolio-data";
 
 export const metadata: Metadata = { title: "Portfolio" };
 
@@ -80,7 +81,8 @@ const work: readonly Work[] = [
   },
 ];
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const published = await loadPublishedPortfolio();
   return (
     <SiteShell>
       <PageIntro eyebrow="Portfolio" title="Work already in the world.">
@@ -127,6 +129,28 @@ export default function PortfolioPage() {
               <p className="mt-6 font-mono text-[12px] tracking-[0.08em] text-cream">
                 {item.domain}
               </p>
+            </Frame>
+          </a>
+        ))}
+        {published.map((item) => (
+          <a
+            key={item.name}
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block min-h-44"
+          >
+            <Frame className="flex h-full flex-col px-6 py-7 transition-colors group-hover:border-gold/50">
+              <div className="flex min-h-24 items-center">
+                <p className="text-base font-medium tracking-tight text-cream">{item.name}</p>
+              </div>
+              <p className="mt-6 font-mono text-[11px] tracking-[0.18em] text-gold uppercase">{item.relationship}</p>
+              <h2 className="mt-3 text-2xl font-medium tracking-tight">{item.name}</h2>
+              {item.place ? (
+                <p className="mt-1 font-mono text-[11px] tracking-[0.16em] text-mute uppercase">{item.place}</p>
+              ) : null}
+              <p className="mt-4 flex-1 text-sm leading-relaxed text-mute">{item.body}</p>
+              <p className="mt-6 font-mono text-[12px] tracking-[0.08em] text-cream">{item.domain}</p>
             </Frame>
           </a>
         ))}

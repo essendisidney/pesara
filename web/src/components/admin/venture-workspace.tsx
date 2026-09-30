@@ -2,9 +2,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   addVentureKpiAction,
+  recordVentureSnapshotAction,
   addVentureMilestoneAction,
+  completeVentureMilestoneAction,
+  uploadVentureDocumentAction,
   addVentureNoteAction,
   updateVentureAction,
+  setVenturePublicationAction,
 } from "@/lib/admin/actions";
 import { formatNairobi } from "@/lib/admin/present";
 import type { VentureWorkspace } from "@/lib/admin/venture-data";
@@ -60,7 +64,23 @@ export function VentureWorkspaceView({
       <p className="mt-3 text-sm text-mute">
         {ventureStatusLabel(venture.status)} · {venture.stage || "Stage not set"} · {relationshipLabel(venture.relationship)}
       </p>
-      {venture.published ? null : <p className="mt-2 text-sm text-mute">Not on the public portfolio.</p>}
+      {venture.published ? (
+        <p className="mt-2 text-sm text-cream">On the public portfolio.</p>
+      ) : (
+        <p className="mt-2 text-sm text-mute">Not on the public portfolio.</p>
+      )}
+      {canAdminister ? (
+        <form action={setVenturePublicationAction} className="mt-4">
+          <input type="hidden" name="ventureId" value={venture.id} />
+          <input type="hidden" name="published" value={venture.published ? "false" : "true"} />
+          <p className="max-w-xl text-sm text-mute">
+            The public card shows the name, the relationship, the description, and the website. Commercial terms stay off it. A card needs a named relationship and a website.
+          </p>
+          <button type="submit" className="mt-3 min-h-11 text-sm text-gold">
+            {venture.published ? "Remove from the public portfolio" : "Show on the public portfolio"}
+          </button>
+        </form>
+      ) : null}
       {notice ? <p className="mt-4 text-sm text-cream">{notice}</p> : null}
       {error ? <p className="mt-4 text-sm text-gold">{error}</p> : null}
 
@@ -133,8 +153,17 @@ export function VentureWorkspaceView({
               {milestone.title}
               <span className="mt-1 block text-xs text-mute">
                 {milestone.dueOn ? `Due ${formatReviewDate(milestone.dueOn)}` : "No due date"}
-                {milestone.completedAt ? ` · Completed ${formatNairobi(milestone.completedAt)}` : ""}
+                {milestone.completedAt ? ` · Completed ${formatNairobi(milestone.completedAt)}` : " · Open"}
               </span>
+              {milestone.completedAt ? null : (
+                <form action={completeVentureMilestoneAction} className="mt-3">
+                  <input type="hidden" name="ventureId" value={venture.id} />
+                  <input type="hidden" name="milestoneId" value={milestone.id} />
+                  <Button type="submit" variant="line" className="h-10 px-4">
+                    Mark complete
+                  </Button>
+                </form>
+              )}
             </li>
           ))}
         </ul>
@@ -158,9 +187,30 @@ export function VentureWorkspaceView({
             <li key={kpi.id} className="text-sm text-cream">
               {kpi.label}
               <span className="mt-1 block text-xs text-mute">
-                {kpi.value}
+                Latest {kpi.value}
                 {kpi.capturedOn ? ` · ${formatReviewDate(kpi.capturedOn)}` : ""}
               </span>
+              {kpi.earlier.length > 0 ? (
+                <ul className="mt-2 space-y-1">
+                  {kpi.earlier.map((reading) => (
+                    <li key={reading.id} className="text-xs text-mute">
+                      {reading.value}
+                      {reading.capturedOn ? ` · ${formatReviewDate(reading.capturedOn)}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <form action={recordVentureSnapshotAction} className="mt-3 flex flex-wrap items-end gap-3">
+                <input type="hidden" name="ventureId" value={venture.id} />
+                <input type="hidden" name="metricId" value={kpi.id} />
+                <label className="text-xs text-mute">
+                  New reading
+                  <input name="value" required inputMode="decimal" className={controlClass} />
+                </label>
+                <Button type="submit" variant="line" className="h-10 px-4">
+                  Record
+                </Button>
+              </form>
             </li>
           ))}
         </ul>
@@ -177,18 +227,30 @@ export function VentureWorkspaceView({
       </Panel>
 
       <Panel title="Documents">
-        {venture.documents.length === 0 ? (
-          <p className="text-sm text-mute">No documents have been stored. File upload waits for a storage bucket.</p>
-        ) : (
-          <ul className="space-y-3">
+        <p className="text-sm text-mute">Staff only. These files stay off the public site.</p>
+        {venture.documents.length === 0 ? <p className="mt-4 text-sm text-mute">No documents have been stored.</p> : null}
+        {venture.documents.length > 0 ? (
+          <ul className="mt-4 space-y-3">
             {venture.documents.map((document) => (
-              <li key={document.id} className="text-sm text-cream">
-                {document.title}
+              <li key={document.id} className="text-sm">
+                <a href={`/venture-files/${document.id}`} className="text-cream">
+                  {document.title}
+                </a>
                 <span className="mt-1 block text-xs text-mute">{formatNairobi(document.at)}</span>
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
+        <form action={uploadVentureDocumentAction} className="mt-6 grid gap-4">
+          <input type="hidden" name="ventureId" value={venture.id} />
+          <Field label="Title">
+            <input name="title" required maxLength={160} className={controlClass} />
+          </Field>
+          <Field label="File">
+            <input name="file" type="file" required className={controlClass} />
+          </Field>
+          <Button type="submit">Store document</Button>
+        </form>
       </Panel>
 
       <Panel title="Notes">
