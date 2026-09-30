@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { EXAMPLE, SHARES, TERMS, illustrate, kes } from "../src/config/partnership";
+import { EXAMPLE, SHARES, TERMS, illustrate, kes, splitPayment } from "../src/config/partnership";
 import { nav } from "../src/config/site";
 import { emptyDraft } from "../src/lib/application";
 import { diagnoseIdea, parseShare, shareQuery } from "../src/lib/idea-check";
@@ -31,6 +31,15 @@ describe("co-build partnership", () => {
     expect(EXAMPLE.equity).toBeGreaterThanOrEqual(TERMS.equity.min);
     expect(EXAMPLE.equity).toBeLessThanOrEqual(TERMS.equity.max);
     expect(kes(2_000_000)).toMatch(/^KES 2.000.000$/);
+  });
+
+  it("splits one payment so the parts add back to the whole", () => {
+    const lines = splitPayment(2_000);
+    expect(lines.map((line) => line.amount)).toEqual([1_820, 160, 20]);
+    expect(lines.reduce((sum, line) => sum + line.amount, 0)).toBe(2_000);
+    expect(lines.reduce((sum, line) => sum + line.percent, 0)).toBe(100);
+    const home = readFileSync(path.join(root, "web/src/app/page.tsx"), "utf8");
+    expect(home).toContain("<SettlementVisual />");
   });
 
   it("links the partnership page and keeps the honest Rails note", () => {

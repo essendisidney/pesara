@@ -4,7 +4,7 @@
   --ink: #060708;
   --ink-2: #0c0f11;
   --cream: #ebe6dc;
-  --mute: #8a8f8b;
+  --mute: #aeb3ae;
   --gold: #c4a46a;
   --forest: #1a3c32;
   --leaf: #2f8f62;
@@ -79,6 +79,41 @@ select:focus-visible {
     linear-gradient(90deg, rgba(196, 164, 106, 0.07) 1px, transparent 1px);
   background-size: 56px 56px;
   mask-image: radial-gradient(ellipse at 70% 40%, black 20%, transparent 72%);
+}
+
+@keyframes settle-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes settle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.settle-grow {
+  transform-origin: left;
+  animation: settle-grow 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.settle-pulse {
+  animation: settle-pulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settle-grow,
+  .settle-pulse {
+    animation: none;
+  }
 }
 
 .horizon {

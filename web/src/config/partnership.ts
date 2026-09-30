@@ -134,3 +134,17 @@ export function illustrate(example: Example = EXAMPLE) {
 export function kes(value: number): string {
   return `KES ${Math.round(value).toLocaleString("en-KE")}`;
 }
+
+export type SplitLine = { key: "venture" | "revenue" | "platform"; label: string; amount: number; percent: number };
+
+/** How one customer payment divides at settlement under the example terms. */
+export function splitPayment(amount: number, example: Example = EXAMPLE): SplitLine[] {
+  const revenue = (amount * example.revenueShare) / 100;
+  const platform = (amount * example.platformFee) / 100;
+  const venture = amount - revenue - platform;
+  return [
+    { key: "venture", label: "To the venture", amount: venture, percent: 100 - example.revenueShare - example.platformFee },
+    { key: "revenue", label: "Pesara revenue share", amount: revenue, percent: example.revenueShare },
+    { key: "platform", label: "Platform fee", amount: platform, percent: example.platformFee },
+  ];
+}

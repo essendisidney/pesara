@@ -1,13 +1,20 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { WaitlistForm } from "@/components/marketing/waitlist-form";
 import { Eyebrow, Frame } from "@/components/marketing/frame";
-import { UrbanField } from "@/components/marketing/urban-field";
+import { SettlementVisual } from "@/components/marketing/settlement-visual";
 import { Button } from "@/components/ui/button";
 import { MONEY_MOVES, SETTLEMENT_STEPS, SHARES } from "@/config/partnership";
 import { getPublicMetrics } from "@/lib/metrics";
 
-const stages = ["Idea", "Validate", "Build", "Launch", "Earn together"] as const;
+const live = [
+  { name: "Jameiyah", note: "Community finance", href: "https://jameiyah.com", logo: "/portfolio/jameiyah-mark.png", light: false },
+  { name: "Marit", note: "Celebrations", href: "https://maritevents.com", logo: "/portfolio/marit-logo.png", light: false },
+  { name: "Little Scientist", note: "Bookings", href: "https://littlescientist.ke", logo: null, light: false },
+  { name: "Mukuna & Co. Advocates", note: "Legal", href: "https://www.mukunaadvocates.co.ke", logo: "/portfolio/mukuna-mark.png", light: false },
+  { name: "Athi Gardens", note: "Property", href: "https://athigardens.com", logo: "/portfolio/athi-gardens-logo.png", light: true },
+] as const;
 
 const rails = [
   { name: "Collections & settlement", items: "M-Pesa, cards, bank transfers, automatic splits, reconciliation", state: "Developing" },
@@ -30,17 +37,17 @@ export default async function HomePage({
   return (
     <SiteShell>
       <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 pt-16 pb-12 lg:grid-cols-[1.05fr_0.95fr] lg:pt-20 lg:pb-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 pt-14 pb-14 lg:grid-cols-[1.1fr_0.9fr] lg:pt-20 lg:pb-20">
           <div>
-            <Eyebrow>Technology venture studio</Eyebrow>
-            <h1 className="mt-7 text-[2.6rem] leading-[1.02] font-medium tracking-[-0.05em] sm:text-6xl lg:text-[4.1rem]">
-              You bring the idea.
-              <br />
-              We bring the technology.
-              <br />
+            <Eyebrow>Technology venture studio · Nairobi</Eyebrow>
+            <h1 className="mt-6 text-[2.5rem] leading-[1.04] font-medium tracking-[-0.045em] text-balance sm:text-[3.4rem] lg:text-[3.9rem]">
+              You bring the idea. We bring the technology.{" "}
               <span className="text-gold">We get paid when you get paid.</span>
             </h1>
-            <p className="mt-7 max-w-lg text-base leading-relaxed text-mute sm:text-lg">
+            <p className="mt-5 text-base text-cream/70 italic">
+              Wazo ni lako. Teknolojia ni yetu. Tunafaidika pamoja.
+            </p>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-cream/85">
               Pesara co-builds companies with founders. We design and engineer the product,
               run its payments, and take our share from what it earns. No big invoice up
               front. If the business doesn&apos;t earn, neither do we.
@@ -53,34 +60,73 @@ export default async function HomePage({
             </div>
             <p className="mt-6 text-sm text-mute">
               Not sure yet?{" "}
-              <Link href="/idea-check" className="text-gold">
+              <Link href="/idea-check" className="text-gold underline-offset-4 hover:underline">
                 Test your idea in five minutes
               </Link>
               .
             </p>
           </div>
-          <div className="relative">
-            <UrbanField />
-            <ol className="absolute inset-0 flex flex-col justify-center gap-1 p-8 sm:p-10">
-              {stages.map((stage, index) => (
-                <li
-                  key={stage}
-                  className="flex items-baseline justify-between border-b border-line/80 py-3 last:border-b-0"
-                >
-                  <span className="font-mono text-[10px] tracking-[0.22em] text-gold uppercase">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="text-xl font-medium tracking-tight sm:text-2xl">{stage}</span>
+          <SettlementVisual />
+        </div>
+      </section>
+
+      <section className="border-y border-line">
+        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <p className="text-[12px] font-medium tracking-[0.14em] text-gold uppercase">
+              Built by operators
+            </p>
+            <p className="mt-4 text-lg leading-relaxed text-cream/90">
+              Pesara is led by Sidney Essendi, who has spent more than fifteen years
+              implementing core banking and payment systems for over 50 institutions across
+              East Africa, including as Head of ICT at Faulu Microfinance Bank.
+            </p>
+            <p className="mt-3 text-sm text-mute">
+              That is why we focus on products money moves through, and why we run the
+              payments ourselves.
+            </p>
+          </div>
+          <div>
+            <p className="text-[12px] font-medium tracking-[0.14em] text-mute uppercase">
+              Already running
+            </p>
+            <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {live.map((item) => (
+                <li key={item.name}>
+                  <a
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-full flex-col justify-between gap-3 rounded-[4px] border border-line p-4 transition-colors hover:border-gold/50"
+                  >
+                    <div className="relative h-12">
+                      {item.logo ? (
+                        <Image
+                          src={item.logo}
+                          alt={item.name}
+                          fill
+                          sizes="160px"
+                          className={`object-contain object-left ${item.light ? "rounded-[2px] bg-cream p-1.5" : ""}`}
+                        />
+                      ) : (
+                        <p className="text-base leading-tight font-extrabold tracking-tight text-white">
+                          {item.name}
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-[12px] text-mute">{item.note}</p>
+                  </a>
                 </li>
               ))}
-            </ol>
-          </div>
-        </div>
-        <div className="border-t border-line">
-          <div className="mx-auto flex max-w-6xl flex-wrap gap-x-8 gap-y-2 px-5 py-4 font-mono text-[10px] tracking-[0.22em] text-mute uppercase">
-            <span>Co-build, not contract</span>
-            <span>Nairobi</span>
-            <span>Africa → the world</span>
+              <li>
+                <Link
+                  href="/portfolio"
+                  className="flex h-full min-h-24 items-center justify-center rounded-[4px] border border-dashed border-line p-4 text-sm text-gold hover:border-gold/50"
+                >
+                  See the portfolio →
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
       </section>
@@ -179,7 +225,7 @@ export default async function HomePage({
         <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {rails.map((item) => (
             <Frame key={item.name} className="p-6">
-              <p className="font-mono text-[10px] tracking-[0.22em] text-gold uppercase">
+              <p className="font-mono text-[11px] tracking-[0.18em] text-gold uppercase">
                 {item.state}
               </p>
               <h3 className="mt-3 text-lg font-medium">{item.name}</h3>

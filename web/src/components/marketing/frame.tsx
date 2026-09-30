@@ -21,7 +21,7 @@ export function Frame({
 
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <p className="font-mono text-[11px] font-medium tracking-[0.28em] text-gold uppercase">
+    <p className="font-mono text-[12px] font-medium tracking-[0.2em] text-gold uppercase">
       {children}
     </p>
   );
