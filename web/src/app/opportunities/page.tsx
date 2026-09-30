@@ -78,8 +78,9 @@ export default function OpportunitiesPage() {
   return (
     <SiteShell>
       <PageIntro eyebrow="Originate" title="Problems Pesara wants solved.">
-        Founders can bring their own idea. Pesara can also name the problems it
-        wants entrepreneurs to work on.
+        Founders can bring their own idea. Pesara also names the problems it wants
+        entrepreneurs to work on. In each one, money already moves. The opportunity is
+        moving it better.
       </PageIntro>
       <div className="mx-auto grid max-w-6xl gap-4 px-5 pb-16 sm:grid-cols-2 lg:grid-cols-3">
         {challenges.map((item) => (

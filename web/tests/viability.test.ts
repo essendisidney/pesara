@@ -11,9 +11,10 @@ import {
 } from "../src/lib/admin/viability";
 
 describe("viability catalog", () => {
-  it("covers twelve dimensions", () => {
-    expect(VIABILITY_CATALOG).toHaveLength(12);
-    expect(catalogDimensions()).toHaveLength(52);
+  it("covers thirteen categories, including rails fit", () => {
+    expect(VIABILITY_CATALOG).toHaveLength(13);
+    expect(catalogDimensions()).toHaveLength(55);
+    expect(VIABILITY_CATALOG.map(([category]) => category)).toContain("Rails fit");
     const keys = catalogDimensions().map((item) => item.key);
     expect(new Set(keys).size).toBe(keys.length);
   });
@@ -43,7 +44,7 @@ describe("weighted assessment", () => {
     expect(summary.categories.find((item) => item.category === "Customer")?.mean).toBeNull();
     expect(summary.overall).toBe(4);
     expect(summary.scored).toBe(3);
-    expect(summary.total).toBe(52);
+    expect(summary.total).toBe(55);
   });
 });
 

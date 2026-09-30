@@ -6,6 +6,7 @@ const groups = [
     title: "Studio",
     links: [
       { href: "/about", label: "About" },
+      { href: "/partnership", label: "Partnership" },
       { href: "/how-it-works", label: "How it works" },
       { href: "/portfolio", label: "Portfolio" },
       { href: "/opportunities", label: "Opportunities" },
@@ -44,7 +45,7 @@ export function Footer() {
         <div>
           <LogoLockup inverted />
           <p className="mt-5 max-w-xs text-sm leading-relaxed text-mute">
-            Ideas deserve execution.
+            You bring the idea. We bring the technology. We get paid when you get paid.
           </p>
         </div>
         {groups.map((group) => (

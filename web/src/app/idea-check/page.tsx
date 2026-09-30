@@ -12,7 +12,7 @@ export default function IdeaCheckPage() {
   return (
     <SiteShell>
       <PageIntro eyebrow="Idea Check" title="Test the shape of the idea before you apply.">
-        Seven questions. A preliminary reading of what you write. Pesara does not treat this as investment advice, and it does not predict whether a venture will succeed.
+        Eight questions. A preliminary reading of what you write, including whether money moves through the product. Pesara does not treat this as investment advice, and it does not predict whether a venture will succeed.
       </PageIntro>
       <IdeaCheck />
     </SiteShell>

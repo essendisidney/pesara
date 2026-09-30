@@ -13,6 +13,7 @@ const fields: { key: keyof IdeaAnswers; label: string }[] = [
   { key: "today", label: "How are they solving it today?" },
   { key: "inadequate", label: "Why is the current solution inadequate?" },
   { key: "payer", label: "Who would pay for your solution?" },
+  { key: "moneyFlow", label: "How would money move through it? Who pays whom, how often, and roughly how much?" },
   { key: "evidence", label: "What evidence do you currently have?" },
   { key: "position", label: "Why are you positioned to solve it?" },
 ];
@@ -23,6 +24,7 @@ const empty: IdeaAnswers = {
   today: "",
   inadequate: "",
   payer: "",
+  moneyFlow: "",
   evidence: "",
   position: "",
 };
@@ -69,7 +71,7 @@ export function IdeaCheck() {
               required
               maxLength={2000}
               rows={4}
-              value={answers[field.key]}
+              value={answers[field.key] ?? ""}
               onChange={(event) => setAnswers((current) => ({ ...current, [field.key]: event.target.value }))}
               className="mt-2 w-full min-h-28 rounded-[2px] border border-line bg-ink-2/80 px-3 py-3 text-base text-cream"
             />

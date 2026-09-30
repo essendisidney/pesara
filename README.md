@@ -2,7 +2,9 @@
 
 Technology venture studio headquartered in Kenya.
 
-**You bring the idea. We bring the technology. We build the business together.**
+**You bring the idea. We bring the technology. We get paid when you get paid.**
+
+Pesara co-builds companies with founders. In a co-build the founder pays no build invoice; Pesara earns equity, a revenue share that steps down once the build is recovered, and a platform fee on money collected through Pesara Rails. The terms live in `web/src/config/partnership.ts` and are explained on `/partnership`.
 
 Pesara is not a software agency, a loan app, a wallet, or a generic fintech dashboard. The public site should leave a visitor thinking: *I have an idea. I should send it to Pesara.*
 
@@ -110,8 +112,9 @@ supabase/migrations/
 2. Idea pipeline — persist wizard to Postgres, uploads, notifications
 3. Operating system — viability, committee, CRM, audit
 4. Venture management
-5. Intelligence — research assistance with mandatory human review
+5. Pesara Rails — collections, settlement and automatic revenue splits
+6. Intelligence — research assistance with mandatory human review
 
 ## Brand
 
-Pesara Limited. Ideas deserve execution. Built in Africa. Built for anywhere.
+Pesara Limited. We get paid when you get paid. Built in Africa. Built for anywhere.

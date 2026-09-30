@@ -23,7 +23,7 @@ const work: readonly Work[] = [
   {
     name: "Marit",
     place: "Nairobi",
-    relationship: "Technology by Pesara",
+    relationship: "Built by Pesara Digital",
     body: "Premium celebrations — weddings, proposals, and destination days — orchestrated so the hosts can stay present.",
     domain: "maritevents.com",
     href: "https://maritevents.com",
@@ -34,7 +34,7 @@ const work: readonly Work[] = [
   {
     name: "Jameiyah",
     place: "Kenya",
-    relationship: "Technology by Pesara",
+    relationship: "Co-built venture",
     body: "Community finance for Kenyan circles: merry-go-round, table banking, and savings, with statements members and officers can both see.",
     domain: "jameiyah.com",
     href: "https://jameiyah.com",
@@ -45,7 +45,7 @@ const work: readonly Work[] = [
   {
     name: "Little Scientist",
     place: "Athi River",
-    relationship: "Technology by Pesara",
+    relationship: "Built by Pesara Digital",
     body: "Big science for little people. Visits, school groups, and birthday bookings at Sabaki Estate.",
     domain: "littlescientist.ke",
     href: "https://littlescientist.ke",
@@ -60,7 +60,7 @@ const work: readonly Work[] = [
   {
     name: "Mukuna & Co. Advocates",
     place: "Kenya",
-    relationship: "Technology by Pesara",
+    relationship: "Built by Pesara Digital",
     body: "Strategic counsel for consequential matters across Kenya and East Africa.",
     domain: "mukunaadvocates.co.ke",
     href: "https://www.mukunaadvocates.co.ke",
@@ -71,7 +71,7 @@ const work: readonly Work[] = [
   {
     name: "Athi Gardens",
     place: "Lukenya Hills",
-    relationship: "Technology by Pesara",
+    relationship: "Built by Pesara Digital",
     body: "Gated plots in Lukenya Hills, about 30 minutes from Nairobi. A project of Athi Plains Holdings.",
     domain: "athigardens.com",
     href: "https://athigardens.com",
@@ -86,7 +86,7 @@ export default async function PortfolioPage() {
   return (
     <SiteShell>
       <PageIntro eyebrow="Portfolio" title="Work already in the world.">
-        Live companies and products. Each card names the relationship Pesara actually has.
+        Live companies and products. Each card names the relationship Pesara actually has: a co-built venture Pesara shares in, or a paid build the client owns.
       </PageIntro>
       <div className="mx-auto grid max-w-6xl gap-4 px-5 pb-16 sm:grid-cols-2 lg:grid-cols-3">
         {work.map((item) => (

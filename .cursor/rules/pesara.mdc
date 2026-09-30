@@ -7,12 +7,12 @@ alwaysApply: true
 
 Read `CURSOR.md` before any product or code change.
 
-Pesara Limited is a technology venture studio. It is not a software agency, a loan app, a wallet, or the previous boda companion product.
+Pesara Limited is a technology venture studio that co-builds companies with founders. It is not a software agency, a loan app, a wallet, or the previous boda companion product.
 
-Proposition: You bring the idea. We bring the technology. We build the business together.
+Proposition: You bring the idea. We bring the technology. We get paid when you get paid.
 
-Pesara evaluates ideas, validates commercial viability, designs the business, builds the technology, launches the product, and may partner through fees, revenue share, equity, licensing, or another written agreement.
+In a co-build the founder pays no build invoice. Pesara earns equity, a revenue share that steps down after the build is recovered, and a platform fee on money collected through Pesara Rails. Partnership numbers live only in `web/src/config/partnership.ts`. Ideas where money does not move through the product go to Pesara Digital as paid builds.
 
-Do not invent production portfolio achievements, fake metrics, or ownership claims. Zero counts show early-stage messaging. Human review is mandatory for venture decisions. Never expose service-role keys.
+Do not invent production portfolio achievements, fake metrics, or ownership claims. Pesara Rails stays marked as in development until it runs in production. Zero counts show early-stage messaging. Human review is mandatory for venture decisions. Never expose service-role keys.
 
 Every public page should leave a visitor thinking: "I have an idea. I should send it to Pesara."

@@ -28,18 +28,23 @@ const steps = [
   },
   {
     n: "05",
-    title: "Build",
-    body: "Pesara designs and engineers the product: strategy, UX, web, mobile, backend, payments, AI, data, cloud, security, analytics.",
+    title: "Agree",
+    body: "A Build decision becomes a written co-build agreement: a new company, equity with vesting, a revenue share that steps down, and a platform fee. Or a paid build, if that fits better.",
   },
   {
     n: "06",
-    title: "Launch",
-    body: "Take the product into the real market. Measure activation, acquisition, conversion, retention, revenue and unit economics.",
+    title: "Build",
+    body: "Pesara designs and engineers the product on Pesara Rails: strategy, UX, web, mobile, payments, ledgers, data, security. The founder does not pay a build invoice in a co-build.",
   },
   {
     n: "07",
-    title: "Scale",
-    body: "Successful products can receive ongoing support around technology, growth, partnerships, capital readiness, enterprise sales and international expansion.",
+    title: "Launch",
+    body: "Take the product into the real market. Measure activation, conversion, retention, revenue and unit economics. Every payment is visible to the founder.",
+  },
+  {
+    n: "08",
+    title: "Earn together",
+    body: "As customers pay, the agreed shares are applied at settlement and the rest goes to the venture. Pesara keeps improving the platform, because it only earns while the venture does.",
   },
 ];
 
@@ -47,7 +52,7 @@ export default function HowItWorksPage() {
   return (
     <SiteShell>
       <PageIntro eyebrow="Process" title="From idea to company.">
-        Evidence before engineering. Don&apos;t just build an app. Build a business.
+        Evidence before engineering. Then a partnership where Pesara is paid from what the business earns, not from what the build costs.
       </PageIntro>
       <div className="mx-auto max-w-6xl px-5">
         <ol className="flex flex-wrap">
@@ -63,8 +68,11 @@ export default function HowItWorksPage() {
           ))}
         </ol>
       </div>
-      <div className="mx-auto max-w-6xl px-5 pt-12 pb-24">
+      <div className="mx-auto flex max-w-6xl flex-wrap gap-3 px-5 pt-12 pb-24">
         <Button href="/submit">Submit Your Idea</Button>
+        <Button href="/partnership" variant="line">
+          How the partnership works
+        </Button>
       </div>
     </SiteShell>
   );

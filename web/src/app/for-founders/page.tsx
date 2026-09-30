@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
 import { Button } from "@/components/ui/button";
@@ -14,31 +15,31 @@ const bring = [
 
 const pesara = [
   "Technology, product, and engineering",
-  "A commercial reading of the opportunity",
+  "Payments and hosting on Pesara Rails",
   "Validation before a large build",
   "A written partnership, if both sides proceed",
 ];
 
 const models = [
-  ["Build", "You fund the build. Pesara builds the technology and can earn fees."],
-  ["Build + grow", "You contribute part of the capital. Pesara contributes technology and product. Fees and revenue participation can combine."],
-  ["Venture build", "Pesara contributes significant technology and venture-building resources, and may receive an agreed ownership interest."],
-  ["Joint venture", "Both sides contribute assets. The economics follow what each side actually brings."],
+  ["Co-build", "The default. Pesara carries the build and is paid through equity, a revenue share that steps down once the build is recovered, and a platform fee on money collected. No build invoice for the founder."],
+  ["Co-build with capital", "The founder, or an investor they bring, funds part of the build. Pesara's revenue share and equity are lower to match."],
+  ["Paid build", "The founder or business pays for the build through Pesara Digital and owns it outright. Pesara takes no equity and no revenue share."],
 ];
 
 const questions = [
   ["Do I need to be technical?", "No. You need a problem worth solving and a reason you can stay with it."],
+  ["Do I pay for the build?", "Not in a co-build. Pesara carries the build cost and recovers it from the business's revenue. See the partnership page for a worked example."],
   ["Does submitting create a partnership?", "No. A committee records a decision. A venture starts only when an admin creates it from a Build decision, under a written agreement."],
   ["Will Pesara publish my idea?", "No. The application stays private. Public numbers, when shown, are aggregates."],
   ["Is this a loan or a grant?", "No. Pesara is a technology venture studio. It does not lend money and it does not promise funding."],
-  ["Are equity percentages listed?", "No. Ownership, fees, and revenue share are written for that venture. They are not a public rate card."],
+  ["Are the percentages fixed?", "No. Pesara publishes typical ranges so you know what to expect. Final terms depend on what each side brings and are written into the venture's own agreement."],
 ];
 
 export default function ForFoundersPage() {
   return (
     <SiteShell>
       <PageIntro eyebrow="Founders" title="You understand the problem. Let's build the solution.">
-        Pesara works with people who have found a real problem and want a company around it. You do not need a technical co-founder to start the conversation.
+        Pesara works with people who have found a real problem that customers would pay to solve. You do not need a technical co-founder, and in a co-build you do not pay for the build.
       </PageIntro>
       <div className="mx-auto grid max-w-6xl gap-6 px-5 md:grid-cols-2">
         <article className="border border-line p-6">
@@ -77,11 +78,15 @@ export default function ForFoundersPage() {
         </ol>
       </section>
       <section className="mx-auto max-w-6xl px-5 pb-16">
-        <h2 className="text-2xl font-medium tracking-tight">Commercial models</h2>
+        <h2 className="text-2xl font-medium tracking-tight">How we work together</h2>
         <p className="mt-3 max-w-2xl text-sm text-mute">
-          The shape is chosen for the idea. Terms stay in the agreement.
+          We get paid when you get paid. Typical ranges and a worked example are on the{" "}
+          <Link href="/partnership" className="text-gold">
+            partnership page
+          </Link>
+          .
         </p>
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
           {models.map(([name, body]) => (
             <article key={name} className="border border-line p-6">
               <h3 className="text-lg font-medium">{name}</h3>

@@ -243,6 +243,17 @@ export function SubmitWizard({ signedIn }: { signedIn: boolean }) {
               <Field label="Who pays?" value={draft.whoPays} onChange={(whoPays) => patch({ whoPays })} />
               <Field label="Why would they pay?" value={draft.whyPay} onChange={(whyPay) => patch({ whyPay })} textarea />
               <Field label="How will the company make money?" value={draft.howMoney} onChange={(howMoney) => patch({ howMoney })} textarea />
+              <Field
+                label="How does money move through the product? Who pays whom, and how often?"
+                value={draft.moneyFlow}
+                onChange={(moneyFlow) => patch({ moneyFlow })}
+                textarea
+              />
+              <Field
+                label="Roughly how much would pass through it each month once it is running? (estimate)"
+                value={draft.monthlyFlow}
+                onChange={(monthlyFlow) => patch({ monthlyFlow })}
+              />
               <Field label="Expected pricing" value={draft.pricing} onChange={(pricing) => patch({ pricing })} />
               <ChoiceSelect
                 label="Pricing model"

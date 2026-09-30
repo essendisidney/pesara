@@ -10,6 +10,7 @@ export function ideaCheckPrefill(current: ApplicationDraft, answers: IdeaAnswers
   const payer = answers.payer.trim();
   const evidence = answers.evidence.trim();
   const position = answers.position.trim();
+  const moneyFlow = (answers.moneyFlow ?? "").trim();
   return {
     ...base,
     problem: problem || base.problem,
@@ -18,6 +19,7 @@ export function ideaCheckPrefill(current: ApplicationDraft, answers: IdeaAnswers
     currentSolution: today || base.currentSolution,
     whyInadequate: inadequate || base.whyInadequate,
     whoPays: payer || base.whoPays,
+    moneyFlow: moneyFlow || base.moneyFlow,
     evidenceNotes: evidence || base.evidenceNotes,
     whyYou: position || base.whyYou,
     submitted: false,

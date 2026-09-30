@@ -108,6 +108,11 @@ export const VIABILITY_CATALOG = [
     ["def_switch", "Switching costs"],
     ["def_reg", "Regulatory advantage"],
   ]],
+  ["Rails fit", [
+    ["rails_flow", "Money through the product"],
+    ["rails_volume", "Transaction volume potential"],
+    ["rails_control", "Collection control"],
+  ]],
   ["Pesara fit", [
     ["fit_improve", "Material improvement"],
     ["fit_capability", "Relevant capabilities"],

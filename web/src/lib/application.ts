@@ -133,6 +133,8 @@ export type ApplicationDraft = {
   whoPays: string;
   whyPay: string;
   howMoney: string;
+  moneyFlow: string;
+  monthlyFlow: string;
   pricing: string;
   pricingModel: string;
   costs: string;
@@ -199,6 +201,8 @@ export const EMPTY_DRAFT: ApplicationDraft = {
   whoPays: "",
   whyPay: "",
   howMoney: "",
+  moneyFlow: "",
+  monthlyFlow: "",
   pricing: "",
   pricingModel: "Subscription",
   costs: "",

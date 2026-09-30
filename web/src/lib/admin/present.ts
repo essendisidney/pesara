@@ -71,6 +71,8 @@ export function applicationSections(draft: ApplicationDraft): { title: string; l
         line("Who pays", draft.whoPays),
         line("Why they pay", draft.whyPay),
         line("How money is made", draft.howMoney),
+        line("Money flow", draft.moneyFlow),
+        line("Monthly flow (estimate)", draft.monthlyFlow),
         line("Pricing", draft.pricing),
         line("Pricing model", draft.pricingModel),
         line("Costs", draft.costs),
