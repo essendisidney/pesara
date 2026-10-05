@@ -1,6 +1,15 @@
 # Pesara Rails v0 — scope (first venture: Jameiyah)
 
-Status: proposal, 30 Sep 2026. Nothing here is built yet.
+Status, 5 Oct 2026: the Pesara side of v0 (option A) is built and tested, not yet running for any venture. Built: tables, RLS and staff RPCs (`supabase/migrations/20261005120000_pesara_rails_v0.sql`), the split engine (`web/src/lib/rails/split.ts`, mirrored in SQL), the signed intake `POST /api/rails/events`, and the founder and staff views with statement issue and settlement. Still needed before anything is metered: the signed Pesara–Jameiyah agreement with real rates, build cost and recovery multiple (entered as a draft and activated by a second person), the Shariah review, the list of in-scope revenue kinds confirmed against Jameiyah's books, `SUPABASE_SERVICE_ROLE_KEY` set in production, an intake secret issued to Jameiyah, and the Jameiyah outbox emitter. Statement PDF is not built. The homepage label stays "Developing" until events flow in production.
+
+### Implementation notes (v0 as built)
+
+- **Recovery** counts only Pesara's revenue share in the recovery tier, net of refunds. Platform fees and tail-tier share do not count toward the cap. Events are split in the order they are recorded, so a late event dated in an earlier month is split at the recovery position when it arrives.
+- **Refunds** must reverse a recorded revenue event in full (`gross_minor` = minus the original, `reverses` = its `source_event_id`). Partial refunds are refused in v0. Each event can be refunded once.
+- **Scope guard**: each agreement lists its metered revenue kinds; an event of any other kind is refused, so client money cannot be metered by mistake.
+- **Four eyes**: whoever drafts an agreement cannot activate it, and whoever issues a statement cannot mark it settled. Settlement must equal Pesara's total on the statement exactly; anything else is refused and left open.
+- **Reconciliation**: if events for a month change after its statement is issued (a late event or a refund), the views list it under exceptions.
+- **Intake**: the body also carries `venture_id`, which selects the secret. Header `x-pesara-timestamp` (unix seconds) and `x-pesara-signature: sha256=<hex HMAC-SHA256 of "${timestamp}.${rawBody}">`. Requests more than 5 minutes off are refused. Re-sending a `source_event_id` returns the stored event (200, `duplicate: true`) and writes nothing; a new event returns 201.
 
 ## Goal
 

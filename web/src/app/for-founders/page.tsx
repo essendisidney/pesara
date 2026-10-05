@@ -21,7 +21,7 @@ const pesara = [
 ];
 
 const models = [
-  ["Co-build", "The default. Pesara carries the build and is paid through equity, a revenue share that steps down once the build is recovered, and a platform fee on money collected. No build invoice for the founder."],
+  ["Co-build", "The default. Pesara carries the build and is paid through equity, a revenue share that steps down once the build is recovered, and a platform fee on the venture's own revenue collected. No build invoice for the founder."],
   ["Co-build with capital", "The founder, or an investor they bring, funds part of the build. Pesara's revenue share and equity are lower to match."],
   ["Paid build", "The founder or business pays for the build through Pesara Digital and owns it outright. Pesara takes no equity and no revenue share."],
 ];

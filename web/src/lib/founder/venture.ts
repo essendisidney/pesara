@@ -1,7 +1,10 @@
+import { isUuid } from "@/lib/admin/pipeline";
 import { safeHttp } from "@/lib/admin/present";
 import { relationshipLabel, ventureStatusLabel } from "@/lib/admin/venture";
 
 export type FounderVenture = {
+  /** Present once the database returns it; used to link to the venture's Rails books. */
+  id: string | null;
   name: string;
   description: string;
   stage: string;
@@ -34,7 +37,9 @@ export function presentFounderVenture(value: unknown): FounderVenture | null {
         }];
       })
     : [];
+  const id = text(row.id);
   return {
+    id: isUuid(id) ? id : null,
     name,
     description: text(row.description),
     stage: text(row.stage),

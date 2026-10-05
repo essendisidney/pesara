@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
+import { BotCheck } from "@/components/forms/bot-check";
 import { Button } from "@/components/ui/button";
 import { INQUIRY_TYPES } from "@/lib/inquiries";
 import { submitInquiryAction } from "@/lib/inquiries-action";
@@ -14,21 +15,21 @@ export default async function ContactPage({
 }) {
   const query = await searchParams;
   const notice = query.notice === "sent";
-  const error =
-    query.error === "invalid"
-      ? "Check the email and the message, then send it again."
-      : query.error === "offline"
-        ? "Pesara is not connected, so this message cannot be stored."
-        : query.error === "failed"
-          ? "The message could not be stored."
-          : null;
+  const errors: Record<string, string> = {
+    invalid: "Check the email and the message, then send it again.",
+    offline: "Pesara is not connected, so this message cannot be stored.",
+    check: "Pesara could not confirm this came from a person. Try again.",
+    busy: "Too many messages from this address. Try again in an hour.",
+    failed: "The message could not be stored.",
+  };
+  const error = typeof query.error === "string" ? errors[query.error] ?? null : null;
 
   return (
     <SiteShell>
       <PageIntro eyebrow="Contact" title="Talk to Pesara.">
         Tell us why you are writing. A person reads what arrives.
       </PageIntro>
-      <form action={submitInquiryAction} className="mx-auto max-w-xl space-y-4 px-5 pb-24">
+      <form action={submitInquiryAction} className="relative mx-auto max-w-xl space-y-4 px-5 pb-24">
         <label className="block text-sm">
           Name
           <input name="name" maxLength={80} autoComplete="name" className="mt-2 h-12 w-full rounded-[2px] border border-line bg-ink-2 px-3" />
@@ -49,6 +50,7 @@ export default async function ContactPage({
           Message
           <textarea required name="message" rows={5} maxLength={4000} className="mt-2 w-full rounded-[2px] border border-line bg-ink-2 p-3" />
         </label>
+        {notice ? null : <BotCheck />}
         {notice ? <p className="text-sm text-gold">Received. A person at Pesara can read it.</p> : null}
         {error ? <p className="text-sm text-gold">{error}</p> : null}
         {notice ? null : <Button type="submit">Send</Button>}

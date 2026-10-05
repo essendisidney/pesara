@@ -14,7 +14,15 @@ import { getAuthContext } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/validation/env";
 import { isCommercialKind, isPublicRelationship, isVentureStatus } from "@/lib/admin/venture";
-import { DOCUMENT_BYTE_LIMIT, isDocumentKind, isDocumentMime, ventureDocumentPath } from "@/lib/documents";
+import {
+  DOCUMENT_BYTE_LIMIT,
+  documentKindLabel,
+  isDocumentKind,
+  isDocumentMime,
+  ventureDocumentPath,
+} from "@/lib/documents";
+import { notifyFounder } from "@/lib/notifications/notify";
+import type { NotificationKind } from "@/lib/notifications";
 
 async function staffClient() {
   if (!supabaseConfigured()) redirect("/login?next=/admin");
@@ -61,6 +69,12 @@ function optionalDate(value: string): string | null {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
 }
 
+function stageNotification(stage: string): NotificationKind {
+  if (stage === "interview") return "interview_requested";
+  if (stage === "validation") return "validation_started";
+  return "stage_changed";
+}
+
 export async function requestDocumentAction(formData: FormData) {
   const id = applicationId(formData);
   if (!id) redirect("/admin/applications?error=invalid");
@@ -77,6 +91,7 @@ export async function requestDocumentAction(formData: FormData) {
     p_note: note,
   });
   if (error) redirect(`/admin/applications/${id}?tab=documents&error=${failureCode(error.message)}`);
+  await notifyFounder(id, "document_requested", { document: documentKindLabel(kind).toLowerCase() });
   revalidatePath("/dashboard/documents");
   revalidatePath("/dashboard/notices");
   revalidatePath(`/dashboard/ideas/${id}`);
@@ -112,6 +127,7 @@ export async function setStageAction(formData: FormData) {
     p_stage: stage,
   });
   if (error) redirect(`/admin/applications/${id}?tab=overview&error=${failureCode(error.message)}`);
+  await notifyFounder(id, stageNotification(stage));
   finish(id, "stage");
 }
 
@@ -246,6 +262,7 @@ export async function recordCommitteeAction(formData: FormData) {
     p_members: members,
   });
   if (error) redirect(`/admin/applications/${id}?tab=committee&error=${failureCode(error.message)}`);
+  await notifyFounder(id, "committee_decision");
   finish(id, "committee", "committee");
 }
 
@@ -312,6 +329,7 @@ export async function createVentureAction(formData: FormData) {
   if (error || typeof data !== "string" || !isUuid(data)) {
     redirect(`/admin/applications/${id}?tab=committee&error=${failureCode(error?.message)}`);
   }
+  await notifyFounder(id, "venture_accepted");
   revalidatePath("/admin");
   revalidatePath("/admin/applications");
   revalidatePath(`/admin/applications/${id}`);

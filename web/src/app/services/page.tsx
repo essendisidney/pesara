@@ -29,7 +29,7 @@ export default function ServicesPage() {
           <p className="font-mono text-[11px] tracking-[0.18em] text-gold uppercase">Pesara Studio</p>
           <h2 className="mt-3 text-2xl font-medium">Co-build</h2>
           <p className="mt-4 text-sm leading-relaxed text-mute">
-            You bring the idea and the market. Pesara validates it, builds it on Pesara Rails, and runs its payments. No build invoice: Pesara is paid through equity, a revenue share that steps down once the build is recovered, and a platform fee on money collected.
+            You bring the idea and the market. Pesara validates it, builds it on Pesara Rails, and runs its payments. No build invoice: Pesara is paid through equity, a revenue share that steps down once the build is recovered, and a platform fee on the venture&rsquo;s own revenue collected.
           </p>
           <p className="mt-3 text-sm text-mute">Best for products that people pay through.</p>
           <div className="mt-6 flex flex-wrap gap-3">
