@@ -4,7 +4,7 @@ Technology venture studio headquartered in Kenya.
 
 **You bring the idea. We bring the technology. We get paid when you get paid.**
 
-Pesara co-builds companies with founders. In a co-build the founder pays no build invoice; Pesara earns equity, a revenue share that steps down once the build is recovered, and a platform fee on money collected through Pesara Rails. The terms live in `web/src/config/partnership.ts` and are explained on `/partnership`.
+Pesara co-builds companies with founders. In a co-build the founder pays no build invoice; Pesara earns equity, a revenue share that steps down once the build is recovered, and a platform fee on the venture's own revenue collected through Pesara Rails (never on money held for its customers). The terms live in `web/src/config/partnership.ts` and are explained on `/partnership`.
 
 Pesara is not a software agency, a loan app, a wallet, or a generic fintech dashboard. The public site should leave a visitor thinking: *I have an idea. I should send it to Pesara.*
 

@@ -24,7 +24,7 @@ Mission: To make sure great ideas don't die because someone couldn't afford to b
 - In a co-build the founder pays no build invoice. Pesara is paid three ways:
   - Equity (typical 15–35%), vesting over 4 years.
   - Revenue share on gross revenue (typical 5–10%) until Pesara recovers 2–3x the build cost, then stepping down (typical 1–3%).
-  - Platform fee on money collected through Pesara Rails (typical 0.5–1.5%).
+  - Platform fee on the venture's own revenue collected through Pesara Rails (typical 0.5–1.5%). Never on client money the venture holds for its customers.
 - The shares are applied at settlement, not invoiced. Until a venture runs on Pesara Rails, shares are settled monthly from statements.
 - Pesara backs ideas where money moves through the product. Other ideas go to Pesara Digital (paid builds, no equity, no revenue share).
 - Each venture is its own company; the founder keeps the majority. The shared platform stays with Pesara and is licensed to the venture. The founder sees every payment and every split. A buyout clause lets a venture leave the platform.

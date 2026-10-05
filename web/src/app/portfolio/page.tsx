@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { SiteShell } from "@/components/marketing/site-shell";
 import { PageIntro } from "@/components/marketing/page-intro";
 import { Frame } from "@/components/marketing/frame";
@@ -14,7 +15,7 @@ type Work = {
   body: string;
   domain: string;
   href: string;
-  logo: string | null;
+  logo: { src: string; width: number; height: number } | null;
   logoClass: string;
   mark: { title: string; line: string; accent: string } | null;
 };
@@ -27,7 +28,7 @@ const work: readonly Work[] = [
     body: "Premium celebrations — weddings, proposals, and destination days — orchestrated so the hosts can stay present.",
     domain: "maritevents.com",
     href: "https://maritevents.com",
-    logo: "/portfolio/marit-logo.png",
+    logo: { src: "/portfolio/marit-logo.png", width: 993, height: 689 },
     logoClass: "h-24 max-w-full",
     mark: null,
   },
@@ -38,7 +39,7 @@ const work: readonly Work[] = [
     body: "Community finance for Kenyan circles: merry-go-round, table banking, and savings, with statements members and officers can both see.",
     domain: "jameiyah.com",
     href: "https://jameiyah.com",
-    logo: "/portfolio/jameiyah-mark.png",
+    logo: { src: "/portfolio/jameiyah-mark.png", width: 281, height: 341 },
     logoClass: "h-14 w-auto",
     mark: null,
   },
@@ -64,7 +65,7 @@ const work: readonly Work[] = [
     body: "Strategic counsel for consequential matters across Kenya and East Africa.",
     domain: "mukunaadvocates.co.ke",
     href: "https://www.mukunaadvocates.co.ke",
-    logo: "/portfolio/mukuna-mark.png",
+    logo: { src: "/portfolio/mukuna-mark.png", width: 1022, height: 881 },
     logoClass: "h-20 w-auto",
     mark: null,
   },
@@ -75,7 +76,7 @@ const work: readonly Work[] = [
     body: "Gated plots in Lukenya Hills, about 30 minutes from Nairobi. A project of Athi Plains Holdings.",
     domain: "athigardens.com",
     href: "https://athigardens.com",
-    logo: "/portfolio/athi-gardens-logo.png",
+    logo: { src: "/portfolio/athi-gardens-logo.png", width: 1400, height: 587 },
     logoClass: "h-auto w-full bg-cream p-3",
     mark: null,
   },
@@ -100,8 +101,10 @@ export default async function PortfolioPage() {
             <Frame className="flex h-full flex-col px-6 py-7 transition-colors group-hover:border-gold/50">
               <div className="flex min-h-24 items-center">
                 {item.logo ? (
-                  <img
-                    src={item.logo}
+                  <Image
+                    src={item.logo.src}
+                    width={item.logo.width}
+                    height={item.logo.height}
                     alt=""
                     className={`${item.logoClass} object-contain object-left`}
                   />
