@@ -41,7 +41,11 @@ Documented in `web/.env.example`.
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` (server only, never `NEXT_PUBLIC_`)
-- Optional: email provider, analytics, future AI, future payments
+- `RESEND_API_KEY`, `EMAIL_FROM` (optional): founder notifications and waitlist email
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` (optional): Cloudflare Turnstile on public forms
+- Optional: future AI, future payments
+
+Public forms are also protected by a honeypot field and per-address and global rate limits enforced in Postgres (`20261005110000_pesara_os_abuse_guard.sql`), so the limits hold even when the RPCs are called directly. Product events are stored first-party in `analytics_events` (no personal data) and shown to staff on `/admin/analytics`.
 
 Never commit secrets.
 
@@ -86,7 +90,16 @@ npm run typecheck
 npm run build
 ```
 
-Critical unit tests cover application references, draft merge (autosave shape), and the ownership rule: Founder A cannot retrieve Founder B. RLS tests against a live database belong in Phase 2 once a project exists.
+Critical unit tests cover application references, draft merge (autosave shape), and the ownership rule: Founder A cannot retrieve Founder B.
+
+Row-level security is also tested against a real Postgres with pgTAP (`supabase/tests/`). Needs Docker and the Supabase CLI:
+
+```bash
+supabase db start   # local Postgres with supabase/migrations applied
+supabase test db    # runs supabase/tests/*.test.sql
+```
+
+The suite signs in as two founders, an analyst and an anonymous visitor and checks that founders only see their own applications, documents, profile, notices, messages and ventures; cannot read `committee_decisions` (only `founder_decision_view`); cannot grant themselves a staff role; and that anon cannot read the waitlist or inquiries. Each file runs in a transaction that is rolled back. CI runs it in the `db` job.
 
 ## Project structure
 

@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { humanSubmission, rateLimited } from "@/lib/abuse";
+import { track } from "@/lib/analytics/events";
 import { inquiryDraft } from "@/lib/inquiries";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/validation/env";
@@ -18,6 +20,7 @@ export async function submitInquiryAction(formData: FormData) {
     message: field(formData, "message"),
   });
   if (!draft) redirect("/contact?error=invalid");
+  if (!(await humanSubmission(formData))) redirect("/contact?error=check");
   if (!supabaseConfigured()) redirect("/contact?error=offline");
   const supabase = await createClient();
   const { error } = await supabase.rpc("submit_inquiry", {
@@ -26,6 +29,7 @@ export async function submitInquiryAction(formData: FormData) {
     p_type: draft.type,
     p_message: draft.message,
   });
-  if (error) redirect("/contact?error=failed");
+  if (error) redirect(rateLimited(error.message) ? "/contact?error=busy" : "/contact?error=failed");
+  await track("service_enquiry", { type: draft.type });
   redirect("/contact?notice=sent");
 }

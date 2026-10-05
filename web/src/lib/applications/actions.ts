@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { mergeDraft, type ApplicationDraft } from "@/lib/application";
 import { supabaseConfigured } from "@/lib/validation/env";
 import { declarationsSchema } from "@/lib/validation/application";
+import { notifyFounder } from "@/lib/notifications/notify";
+import { track } from "@/lib/analytics/events";
 
 export type SaveState = "saved" | "saving" | "error" | "local";
 
@@ -131,6 +133,7 @@ export async function saveApplicationDraft(
   if (error || !data) {
     return { draft, state: "error", message: "Unable to save — retrying" };
   }
+  if (!draft.applicationId) await track("application_started");
 
   return {
     draft: {
@@ -181,6 +184,10 @@ export async function submitApplication(
   if (!submitted) {
     return { draft: saved.draft, message: "Pesara could not issue a reference." };
   }
+  await Promise.all([
+    notifyFounder(submitted.id, "application_received"),
+    track("application_submitted"),
+  ]);
   return {
     draft: {
       ...saved.draft,
