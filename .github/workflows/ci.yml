@@ -28,3 +28,15 @@ jobs:
       - run: npm test
       - run: npm audit --omit=dev --audit-level=high
       - run: npm run build
+
+  db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      # Starts Postgres only and applies supabase/migrations + seed.sql.
+      - run: supabase db start
+      # pgTAP suites in supabase/tests (live RLS checks).
+      - run: supabase test db
