@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getFounderApplication } from "@/lib/applications/actions";
@@ -211,7 +212,14 @@ export default async function DashboardIdeaPage({
         <section className="mt-10 max-w-2xl border border-line px-5 py-6">
           <p className="text-xs tracking-[0.18em] text-gold uppercase">Venture</p>
           <h2 className="mt-3 text-2xl font-semibold">{venture.name}</h2>
-          <p className="mt-2 text-sm text-mute">Commercial terms stay inside Pesara.</p>
+          {venture.id ? (
+            <Link
+              href={`/dashboard/ventures/${venture.id}/rails`}
+              className="mt-2 inline-flex min-h-11 items-center text-sm text-gold"
+            >
+              Payments and splits on Pesara Rails
+            </Link>
+          ) : null}
           {venture.relationship ? <p className="mt-4 text-sm text-cream">{venture.relationship}</p> : null}
           <p className="mt-2 text-sm text-mute">{[venture.status, venture.stage].filter(Boolean).join(" · ")}</p>
           {venture.description ? <p className="mt-4 text-sm whitespace-pre-wrap text-cream">{venture.description}</p> : null}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { VentureWorkspaceView } from "@/components/admin/venture-workspace";
 import { EmptyState } from "@/components/ui/empty-state";
 import { knownMessage, PAGE_ERRORS } from "@/lib/admin/pipeline";
@@ -25,11 +26,18 @@ export default async function Page({
   }
   const auth = await getAuthContext();
   return (
-    <VentureWorkspaceView
-      venture={result.value}
-      canAdminister={isAdminRole(auth?.role)}
-      notice={knownMessage(VENTURE_NOTICES, query.notice)}
-      error={knownMessage(PAGE_ERRORS, query.error)}
-    />
+    <>
+      <VentureWorkspaceView
+        venture={result.value}
+        canAdminister={isAdminRole(auth?.role)}
+        notice={knownMessage(VENTURE_NOTICES, query.notice)}
+        error={knownMessage(PAGE_ERRORS, query.error)}
+      />
+      <p className="mt-8">
+        <Link href={`/admin/ventures/${result.value.id}/rails`} className="text-sm text-gold">
+          Pesara Rails: payments, splits and statements
+        </Link>
+      </p>
+    </>
   );
 }
