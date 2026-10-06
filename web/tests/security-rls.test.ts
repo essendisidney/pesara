@@ -150,10 +150,12 @@ describe("founder isolation", () => {
     expect(founders.body.toLowerCase().startsWith("for select")).toBe(true);
     expect(founders.body).toContain("user_id = auth.uid()");
 
-    const view = sql.match(/create or replace view public\.portfolio_ventures[\s\S]*?;/i)?.[0] ?? "";
-    expect(view).toContain("security_barrier = true");
-    expect(view).toContain("security_invoker = false");
-    expect(view).toContain("public_visible = true");
+    // The public portfolio is read through a function with a fixed column list,
+    // not a SECURITY DEFINER view (Supabase lint 0010).
+    expect(sql).toMatch(/drop view if exists public\.portfolio_ventures/i);
+    const portfolio = lastFunction(sql, "public.published_portfolio");
+    expect(portfolio).toContain("v.public_visible = true");
+    expect(portfolio).toContain("v.is_demo = false");
     for (const column of [
       "commercial_kind",
       "commercial_terms",
@@ -165,7 +167,7 @@ describe("founder isolation", () => {
       "founder_contribution",
       "application_id",
     ]) {
-      expect(view).not.toContain(column);
+      expect(portfolio).not.toContain(column);
     }
   });
 

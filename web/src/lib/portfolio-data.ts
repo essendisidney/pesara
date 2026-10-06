@@ -10,10 +10,7 @@ function records(data: unknown): Record<string, unknown>[] {
 export async function loadPublishedPortfolio(): Promise<PortfolioCard[]> {
   if (!supabaseConfigured()) return [];
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("portfolio_ventures")
-    .select("name, description, country, industry, website, pesara_relationship")
-    .limit(50);
+  const { data, error } = await supabase.rpc("published_portfolio");
   if (error) return [];
   return publishedPortfolioCards(records(data));
 }
