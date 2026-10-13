@@ -80,6 +80,7 @@ export default async function StaffRailsPage({
 
       <RailsStatements
         books={books}
+        statementHref={(statement) => `/admin/ventures/${books.ventureId}/rails/statements/${statement.id}`}
         renderActions={(statement) =>
           statement.status === "issued" ? (
             <form action={settleRailsStatementAction} className="mt-4 grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">

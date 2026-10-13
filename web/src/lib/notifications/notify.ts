@@ -1,5 +1,6 @@
 import { stageLabel } from "@/lib/admin/pipeline";
 import { sendEmail, emailConfigured } from "@/lib/email/send";
+import { describeError, reportIssue } from "@/lib/ops";
 import type { NotificationKind } from "@/lib/notifications";
 import { notificationEmail } from "@/lib/notifications/email";
 import { createServiceClient, serviceRoleConfigured } from "@/lib/supabase/service";
@@ -11,7 +12,7 @@ import { createServiceClient, serviceRoleConfigured } from "@/lib/supabase/servi
 export async function notifyFounder(
   applicationId: string,
   kind: NotificationKind,
-  extra: { document?: string } = {},
+  extra: { document?: string; path?: string } = {},
 ): Promise<void> {
   if (!emailConfigured() || !serviceRoleConfigured()) return;
   try {
@@ -26,7 +27,8 @@ export async function notifyFounder(
     const to = user?.user?.email;
     if (!to) return;
     const path =
-      kind === "document_requested" ? "/dashboard/documents" : `/dashboard/ideas/${applicationId}`;
+      extra.path ??
+      (kind === "document_requested" ? "/dashboard/documents" : `/dashboard/ideas/${applicationId}`);
     await sendEmail({
       to,
       ...notificationEmail(kind, {
@@ -37,6 +39,6 @@ export async function notifyFounder(
       }),
     });
   } catch (error) {
-    console.error("[pesara:notify] failed", kind, error);
+    await reportIssue("notify", `Founder notification failed: ${describeError(error)}`, { kind, applicationId });
   }
 }

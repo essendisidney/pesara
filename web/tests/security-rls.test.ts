@@ -143,6 +143,7 @@ describe("founder isolation", () => {
   it("keeps venture workspaces and commercial terms off the public read path", () => {
     expect(policies.has("public.ventures.ventures_public")).toBe(false);
     expectStaffRead(policies, "public.ventures.ventures_staff");
+    expectStaffRead(policies, "public.ops_events.ops_events_staff_read");
     expectStaffRead(policies, "public.venture_metrics.venture_metrics_staff");
     expectStaffRead(policies, "public.venture_documents.venture_docs_staff");
     expectStaffRead(policies, "public.admin_notes.notes_staff");

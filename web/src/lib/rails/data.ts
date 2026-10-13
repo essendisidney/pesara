@@ -95,3 +95,54 @@ export async function loadRailsBooks(ventureId: string, viewer: "staff" | "found
     },
   };
 }
+
+export type StatementLoad =
+  | { status: "offline" }
+  | { status: "error" }
+  | { status: "missing" }
+  | { status: "ready"; ventureId: string; ventureName: string; statement: RailsStatement; events: RailsEvent[] };
+
+/** Events listed on one printed statement. A month with more is summarised by its totals. */
+export const STATEMENT_EVENT_LIMIT = 1000;
+
+/**
+ * One statement with every event of its month, for the printable statement page.
+ * Uses the viewer's own session, so row-level security decides access.
+ */
+export async function loadRailsStatement(ventureId: string, statementId: string): Promise<StatementLoad> {
+  if (!supabaseConfigured()) return { status: "offline" };
+  if (!isUuid(ventureId) || !isUuid(statementId)) return { status: "missing" };
+  const supabase = await createClient();
+
+  const [summary, statementRow] = await Promise.all([
+    supabase.rpc("rails_venture_summary", { p_venture: ventureId }),
+    supabase
+      .from("rails_statements")
+      .select("id, period_month, currency, event_count, gross_minor, venture_minor, revenue_share_minor, platform_fee_minor, pesara_total_minor, recovered_to_date_minor, cap_minor, cap_remaining_minor, status, issued_by, issued_at, settlement_reference, settled_amount_minor, settled_at")
+      .eq("venture_id", ventureId)
+      .eq("id", statementId)
+      .maybeSingle(),
+  ]);
+  if (summary.error || statementRow.error) return { status: "error" };
+  const venture = presentSummary(summary.data);
+  const statement = presentStatements(statementRow.data ? [statementRow.data] : [])[0];
+  if (!venture || !statement) return { status: "missing" };
+
+  const events = await supabase
+    .from("rails_revenue_events")
+    .select("id, source_event_id, kind, gross_minor, currency, occurred_at, period_month, reference, reverses, received_at, rails_split_lines(event_id, line, tier, amount_minor)")
+    .eq("venture_id", ventureId)
+    .eq("period_month", statement.periodMonth)
+    .order("occurred_at", { ascending: true })
+    .limit(STATEMENT_EVENT_LIMIT);
+  if (events.error) return { status: "error" };
+  const lineData = (events.data ?? []).flatMap((event) => (Array.isArray(event.rails_split_lines) ? event.rails_split_lines : []));
+
+  return {
+    status: "ready",
+    ventureId,
+    ventureName: venture.name,
+    statement,
+    events: presentEvents(events.data, lineData),
+  };
+}

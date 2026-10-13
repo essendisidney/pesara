@@ -1,6 +1,7 @@
 import { MAX_BODY_BYTES, railsEventSchema, refusalFor, ventureIdOf } from "@/lib/rails/intake";
 import { SIGNATURE_HEADER, TIMESTAMP_HEADER, verifySignature } from "@/lib/rails/signature";
 import { createServiceClient, serviceRoleConfigured } from "@/lib/supabase/service";
+import { reportIssue } from "@/lib/ops";
 
 /**
  * Pesara Rails v0 revenue event intake.
@@ -35,7 +36,10 @@ export async function POST(request: Request) {
     .select("secret")
     .eq("venture_id", ventureId)
     .maybeSingle();
-  if (secretError) return reply(500, { error: "not_recorded" });
+  if (secretError) {
+    await reportIssue("rails.intake", "Intake secret could not be read", { ventureId });
+    return reply(500, { error: "not_recorded" });
+  }
 
   const check = verifySignature({
     secret: typeof secretRow?.secret === "string" ? secretRow.secret : "",
@@ -65,6 +69,14 @@ export async function POST(request: Request) {
   });
   if (error) {
     const refusal = refusalFor(error.message);
+    // The sender is authenticated here, so a refusal means a real venture's revenue
+    // was not metered. Staff need to see it; unsigned noise above is not recorded.
+    await reportIssue(
+      "rails.intake",
+      `Signed revenue event refused: ${refusal.error}`,
+      { ventureId: event.venture_id, sourceEventId: event.source_event_id, status: refusal.status },
+      refusal.status >= 500 ? "error" : "warn",
+    );
     return reply(refusal.status, { error: refusal.error });
   }
   const result = data && typeof data === "object" ? (data as Record<string, unknown>) : {};

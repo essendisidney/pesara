@@ -29,7 +29,10 @@ export default async function FounderRailsPage({ params }: { params: Promise<{ i
       </Link>
       <RailsHeader books={books} eyebrow="Pesara Rails" />
       <RailsRecovery books={books} />
-      <RailsStatements books={books} />
+      <RailsStatements
+        books={books}
+        statementHref={(statement) => `/dashboard/ventures/${books.ventureId}/rails/statements/${statement.id}`}
+      />
       <RailsEvents books={books} />
     </>
   );

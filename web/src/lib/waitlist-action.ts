@@ -6,6 +6,7 @@ import { humanSubmission, rateLimited } from "@/lib/abuse";
 import { track } from "@/lib/analytics/events";
 import { emailConfigured, sendEmail } from "@/lib/email/send";
 import { isUuid } from "@/lib/admin/pipeline";
+import { describeError, reportIssue } from "@/lib/ops";
 import { waitlistDraft } from "@/lib/waitlist";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient, serviceRoleConfigured } from "@/lib/supabase/service";
@@ -34,7 +35,7 @@ async function sendWelcome(entry: unknown, to: string) {
       text: `Thank you for joining. Pesara will write when there is something worth reading: new ventures, open roles and founder calls.\n\nTo leave the list at any time:\n${leave}\n\nPesara Limited\n${site.tagline}`,
     });
   } catch (error) {
-    console.error("[pesara:waitlist] welcome email failed", error);
+    await reportIssue("waitlist", `Welcome email failed: ${describeError(error)}`);
   }
 }
 
