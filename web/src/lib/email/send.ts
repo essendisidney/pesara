@@ -1,3 +1,5 @@
+import { describeError, reportIssue } from "@/lib/ops";
+
 export type Email = {
   to: string;
   subject: string;
@@ -29,12 +31,12 @@ export async function sendEmail(email: Email, fetcher: typeof fetch = fetch): Pr
       }),
     });
     if (!response.ok) {
-      console.error("[pesara:email] provider rejected", response.status);
+      await reportIssue("email", "Email provider rejected a message", { status: response.status });
       return false;
     }
     return true;
   } catch (error) {
-    console.error("[pesara:email] send failed", error);
+    await reportIssue("email", `Email could not be sent: ${describeError(error)}`);
     return false;
   }
 }

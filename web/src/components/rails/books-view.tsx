@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { formatNairobi } from "@/lib/admin/present";
 import { lineLabel, monthLabel, recoveryProgress, statementExceptions, type RailsStatement } from "@/lib/rails/books";
 import type { RailsBooks } from "@/lib/rails/data";
@@ -89,9 +90,12 @@ export function RailsRecovery({ books }: { books: RailsBooks }) {
 export function RailsStatements({
   books,
   renderActions,
+  statementHref,
 }: {
   books: RailsBooks;
   renderActions?: (statement: RailsStatement) => ReactNode;
+  /** Where the printable statement lives, e.g. `/dashboard/ventures/<id>/rails/statements/<statementId>`. */
+  statementHref?: (statement: RailsStatement) => string;
 }) {
   const exceptions = statementExceptions(books.statements, books.months);
   return (
@@ -116,6 +120,11 @@ export function RailsStatements({
               {statement.eventCount} {statement.eventCount === 1 ? "event" : "events"} · issued {formatNairobi(statement.issuedAt)}
               {statement.status === "settled" ? ` · settled ${formatNairobi(statement.settledAt)}, reference ${statement.settlementReference ?? "—"}` : ""}
             </p>
+            {statementHref ? (
+              <Link href={statementHref(statement)} className="mt-3 inline-flex min-h-11 items-center text-sm text-gold">
+                Open printable statement
+              </Link>
+            ) : null}
             {renderActions ? renderActions(statement) : null}
           </li>
         ))}

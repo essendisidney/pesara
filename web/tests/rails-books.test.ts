@@ -161,3 +161,12 @@ describe("rails migration guards", () => {
     expect(sql).toContain("unique (venture_id, source_event_id)");
   });
 });
+
+describe("statement payment reference", () => {
+  it("is short, stable and names the venture and month", async () => {
+    const { statementReference } = await import("../src/lib/rails/books");
+    const ref = statementReference("1a2b3c4d-5e6f-4a1b-8c9d-0e1f2a3b4c5d", "2026-09-01");
+    expect(ref).toBe("PSR-1A2B3C4D-2026-09");
+    expect(ref.length).toBeLessThanOrEqual(20);
+  });
+});

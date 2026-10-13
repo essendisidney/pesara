@@ -10,6 +10,7 @@ import {
 } from "@/lib/documents";
 import { isUuid } from "@/lib/admin/pipeline";
 import { getAuthContext } from "@/lib/auth/session";
+import { notifyFounder } from "@/lib/notifications/notify";
 import { isStaffRole } from "@/lib/permissions/roles";
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/validation/env";
@@ -19,6 +20,19 @@ async function actor() {
   const auth = await getAuthContext();
   if (!auth) redirect("/login?next=/dashboard");
   return auth;
+}
+
+async function threadApplication(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  threadId: string,
+): Promise<string | null> {
+  const { data } = await supabase
+    .from("message_threads")
+    .select("application_id")
+    .eq("id", threadId)
+    .maybeSingle();
+  const id = data?.application_id;
+  return typeof id === "string" && isUuid(id) ? id : null;
 }
 
 function field(formData: FormData, name: string): string {
@@ -134,6 +148,9 @@ export async function openThreadAction(formData: FormData) {
     if (next === "admin") redirect(`/admin/applications/${applicationId}?tab=messages&error=failed`);
     redirect(`/dashboard/messages/${threadId}?error=failed`);
   }
+  if (isStaffRole(auth.role)) {
+    await notifyFounder(applicationId, "new_message", { path: `/dashboard/messages/${threadId}` });
+  }
   revalidatePath("/dashboard/messages");
   revalidatePath(`/admin/applications/${applicationId}`);
   if (next === "admin") redirect(`/admin/applications/${applicationId}?tab=messages&notice=message`);
@@ -141,7 +158,7 @@ export async function openThreadAction(formData: FormData) {
 }
 
 export async function replyMessageAction(formData: FormData) {
-  await actor();
+  const auth = await actor();
   const threadId = field(formData, "threadId");
   const body = field(formData, "body");
   const documentId = field(formData, "documentId");
@@ -158,6 +175,14 @@ export async function replyMessageAction(formData: FormData) {
     p_document: documentId || null,
   });
   if (posted.error) redirect(`${back}${back.includes("?") ? "&" : "?"}error=failed`);
+  if (isStaffRole(auth.role)) {
+    const applicationId = isUuid(adminApplication)
+      ? adminApplication
+      : await threadApplication(supabase, threadId);
+    if (applicationId) {
+      await notifyFounder(applicationId, "new_message", { path: `/dashboard/messages/${threadId}` });
+    }
+  }
   revalidatePath("/dashboard/messages");
   revalidatePath(`/dashboard/messages/${threadId}`);
   if (isUuid(adminApplication)) revalidatePath(`/admin/applications/${adminApplication}`);

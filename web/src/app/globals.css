@@ -140,4 +140,11 @@ select:focus-visible {
     background: #fff !important;
     color: #111 !important;
   }
+
+  .print-sheet,
+  .print-sheet * {
+    color: #111 !important;
+    border-color: #ccc !important;
+    background: transparent !important;
+  }
 }

@@ -290,3 +290,13 @@ export function lineLabel(line: RailsSplitLine): string {
   if (line.line === "platform_fee") return "Platform fee";
   return line.tier === "tail" ? "Revenue share (after recovery)" : "Revenue share (recovery)";
 }
+
+/**
+ * The reference a venture quotes when it pays a statement, e.g. PSR-1A2B3C4D-2026-09.
+ * Short enough for an M-Pesa account field (20 characters).
+ */
+export function statementReference(ventureId: string, periodMonth: string): string {
+  const venture = ventureId.replace(/-/g, "").slice(0, 8).toUpperCase();
+  const month = /^\d{4}-\d{2}/.exec(periodMonth)?.[0] ?? periodMonth.slice(0, 7);
+  return `PSR-${venture}-${month}`;
+}
